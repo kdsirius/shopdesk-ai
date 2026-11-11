@@ -1,206 +1,169 @@
-# 第 1 节：项目定位与最小骨架
+# 第 1 节：项目定位与导入骨架模块
 
-> 这一节先把原项目的全景和导入流程骨架看懂，再用一个不依赖真实模型、数据库和 PDF 工具的最小流程验证“状态 → 节点 → 主图”。下一节再进入 uv 环境、配置加载和入口节点的完整工程化写法。
+> 本节只做三件事：看懂掌柜智库的真实业务链路，手敲导入流程的三个基础模块，按步骤验证这些模块的真实行为。PDF、模型、Milvus 等功能在对应节点出现后再验证，本节不提前写替身流程。
 
 ---
 
 ## 0. 本节你会学到
 
-1. 说清楚掌柜智库解决什么业务问题，以及 RAG 问答为什么先要做文档导入。
-2. 用 Python 字典表达一条最小的导入状态，并看见状态如何经过多个节点。
-3. 理解参考项目中的 `TypedDict`、节点基类、`__call__` 和 LangGraph 主图分别解决什么问题。
-4. 用 uv 创建 Python 3.11 项目、安装 LangGraph，并运行一个不依赖外部服务的流程。
-5. 用文件类型路由实验验证 PDF、Markdown 和不支持格式走不同路径。
+1. 说清楚文档为什么要经过“解析 → 切片 → 向量化 → 入库”，以及它怎样支撑后面的问答。
+2. 手敲并读懂 `exceptions.py`、`state.py`、`BaseNode.py` 三个真实骨架模块。
+3. 用命令验证状态工厂、异常对象和节点基类当前已经具备的真实行为。
 
-**前置条件**：当前仓库还没有学习代码；本机摸底到的环境是 uv 0.12.13、Python 3.12.9。参考项目要求 Python 3.11，本节会用 uv 为学习工程声明 Python 3.11；这条初始化命令已在 `workspace/` 实测，详细安装命令见第 2 节。
+**前置条件**：当前工程已经有 `pyproject.toml`、`src/shopkeeper_brain/` 和 LangGraph 依赖。本节不重复初始化 uv 项目，也不新增测试文件。
 
 ---
 
-## 1. 术语小灶
+## 1. 业务流程：掌柜智库到底在处理什么
 
-### 1.1 RAG
+用户上传一份产品手册后，系统先把它变成“可以被检索的知识”，再处理用户问题。
 
-RAG 是“先检索资料，再让模型根据资料回答”。它不是把所有资料直接塞给模型，而是先把文档加工成可搜索的知识。
+```mermaid
+flowchart LR
+    A[用户上传 PDF / Markdown] --> B[node_entry 入口判断]
+    B --> C[node_pdf_to_md PDF 转 Markdown]
+    C --> D[node_md_img 图片处理]
+    B --> D
+    D --> E[node_document_split 文档切片]
+    E --> F[node_item_name_recognition 主体识别]
+    F --> G[node_bge_embedding 向量化]
+    G --> H[node_import_milvus 写入 Milvus]
+    H --> I[知识库可检索]
 
-生活类比：你去图书馆问问题，管理员先找到相关书页，再把书页交给回答者。掌柜智库中的“文档导入”就是管理员整理书架的过程，“检索和答案输出”才是回答问题的过程。
-
-### 1.2 状态（State）
-
-状态就是流程中一路传递的工作单。它可以记录任务 ID、原文件路径、文件类型判断、转换后的 Markdown、切片和向量等中间结果。
-
-```python
-state = {
-    "import_file_path": "manual.pdf",
-    "is_pdf_read_enabled": True,
-}
+    I --> J[用户提问]
+    J --> K[产品确认]
+    K --> L[向量检索 / HyDE / Web 搜索]
+    L --> M[RRF 融合]
+    M --> N[Rerank 重排]
+    N --> O[答案生成]
+    O --> P[FastAPI + SSE 输出]
 ```
 
-和 Java 中的方法参数对象类似，但参考项目使用的是字典形态，因为 LangGraph 的节点以状态字典作为输入输出。
+这条链路里，本节只落地最前面的流程基础设施：
 
-### 1.3 节点（Node）
-
-节点是流程中的一个业务步骤，例如“入口节点”“PDF 转 Markdown 节点”“文档切片节点”。一个节点读取状态，完成自己的工作，再返回更新后的状态。
-
-### 1.4 主图（Graph）
-
-主图负责安排节点顺序和分支。节点只关心自己的业务，主图负责回答“下一个执行谁”。这就是参考项目把节点和 `main_graph.py` 分开的原因。
-
-### 1.5 `TypedDict`
-
-`TypedDict` 仍然是字典，但给字典声明了字段和类型。它不会在运行时把字典变成 Java Bean，也不会自动做完整的数据校验；它首先解决的是 IDE 补全、静态检查和状态契约可读性。
-
-### 1.6 `__call__`
-
-Python 允许对象实现 `__call__` 后像函数一样被调用：`node(state)`。参考项目利用这一点，让 LangGraph 看到的是一个可调用节点，同时把日志、异常包装等通用动作放进节点基类。
-
----
-
-## 2. 环境准备：先让 uv 建出空项目
-
-参考资料使用 `uv.toml` 配置镜像，但当前 uv 官方文档推荐在 `pyproject.toml` 的 `[tool.uv]` 中声明索引。为了避免把过时配置直接复制进学习项目，本节使用当前语法。
-
-在仓库根目录执行。当前仓库还没有 `pyproject.toml`，所以这条命令只需要执行一次：
-
-```bash
-uv init --python 3.11 --name shopkeeper-brain
-```
-
-**预期效果**：根目录出现 `pyproject.toml`，其中包含 `requires-python = ">=3.11"`；同时 uv 会创建项目需要的基础配置。该命令在 `workspace/verification/day01/project` 实测通过。
-
-在生成的 `pyproject.toml` 中追加当前 uv 的镜像配置。只追加下面这段，不要删除 `uv init` 生成的内容：
-
-```toml
-[[tool.uv.index]]
-url = "https://pypi.tuna.tsinghua.edu.cn/simple"
-default = true
-```
-
-**验证状态**：配置语法依据 uv 官方当前文档；本节已实际用 `UV_DEFAULT_INDEX=https://pypi.tuna.tsinghua.edu.cn/simple uv add langgraph` 验证安装流程，直接把配置写入 `pyproject.toml` 的行为尚未在本仓库执行，标记为“未验证”。
-
-安装 LangGraph：
-
-```bash
-uv add langgraph
-```
-
-如果当前终端还没有使用项目配置，可以在 Git Bash 中临时指定镜像：
-
-```bash
-UV_DEFAULT_INDEX=https://pypi.tuna.tsinghua.edu.cn/simple uv add langgraph
-```
-
-PowerShell 等价写法：
-
-```powershell
-$env:UV_DEFAULT_INDEX = "https://pypi.tuna.tsinghua.edu.cn/simple"
-uv add langgraph
-Remove-Item Env:UV_DEFAULT_INDEX
-```
-
-**预期效果**：`pyproject.toml` 的 `dependencies` 出现 `langgraph`，同时生成或更新 `uv.lock` 和 `.venv`。如果你使用的是 PowerShell，记录真实命令输出；不要把“安装成功”当成猜测。
-
----
-
-## 3. 阶段① 最小探针：先看看直写流程会怎么跑
-
-当前项目还没有学习代码，因此这里不是读取现状，而是在新工程中故意写一个最小、直白的版本。先不要急着创建基类、状态类型和 LangGraph；先让一条业务流程跑起来。
-
-### 3.1 直写版本
-
-**文件**：`src/shopkeeper_brain/processor/import_process/probe.py`
-
-```python
-from pathlib import Path
-
-
-def entry(state: dict) -> dict:
-    """入口步骤：根据扩展名决定后续路径。"""
-    file_path = Path(state["import_file_path"])
-    state["visited_nodes"].append("entry")
-
-    if file_path.suffix.lower() == ".pdf":
-        state["is_pdf_read_enabled"] = True
-    elif file_path.suffix.lower() == ".md":
-        state["is_md_read_enabled"] = True
-    else:
-        state["status"] = "unsupported"
-
-    return state
-
-
-def pdf_to_markdown(state: dict) -> dict:
-    """模拟 PDF 转 Markdown，不接入真实 MinerU。"""
-    state["visited_nodes"].append("pdf_to_markdown")
-    state["status"] = "markdown_ready"
-    return state
-
-
-def run_import(import_file_path: str) -> dict:
-    """用最直白的方式串起当前能处理的步骤。"""
-    state = {
-        "import_file_path": import_file_path,
-        "is_pdf_read_enabled": False,
-        "is_md_read_enabled": False,
-        "visited_nodes": [],
-        "status": "created",
-    }
-
-    state = entry(state)
-    if state["is_pdf_read_enabled"]:
-        state = pdf_to_markdown(state)
-
-    return state
-
-
-if __name__ == "__main__":
-    for file_path in ("manual.pdf", "manual.md", "manual.txt"):
-        print(file_path, "->", run_import(file_path))
-```
-
-运行：
-
-```bash
-uv run python -m shopkeeper_brain.processor.import_process.probe
-```
-
-**预期效果**：
-
-- `manual.pdf` 的 `visited_nodes` 包含 `entry` 和 `pdf_to_markdown`，状态为 `markdown_ready`。
-- `manual.md` 只经过 `entry`，状态仍是 `created`。
-- `manual.txt` 只经过 `entry`，状态为 `unsupported`。
-
-这段代码能工作，但问题已经出现：状态字段散落在函数里，节点没有统一接口，异常没有统一上下文，流程分支也混在执行代码中。接下来只解决这些具体问题。
-
----
-
-## 4. 阶段② 盯着探针，列出要补的账
-
-| 缺口 | 后果 | 优先级 |
+| 模块 | 当前作用 | 后续谁会用它 |
 | --- | --- | --- |
-| 状态只是普通 `dict`，字段没有集中声明 | 节点写错字段名时，编辑器和读代码的人都很难发现 | 高 |
-| 每个步骤都是普通函数 | 日志、异常、任务追踪将来会在每个函数里重复 | 高 |
-| PDF、Markdown 和不支持格式的分支写在 `run_import` 中 | 主流程会随着节点增加而变得越来越长 | 高 |
-| `pdf_to_markdown` 只是模拟动作 | 本节只验证骨架；真实 MinerU 放到后续 PDF 节点章节 | 中 |
-| 没有外部服务隔离 | 一开始就接 Milvus 或模型会把流程问题和环境问题混在一起 | 高 |
+| `exceptions.py` | 给流程错误增加节点名和原始原因 | 所有导入节点 |
+| `state.py` | 规定节点之间传递哪些字段 | LangGraph 导入主图 |
+| `BaseNode.py` | 统一节点调用入口和异常包装 | 入口、PDF、切片等导入节点 |
 
-参考项目的 `config.py`、`exceptions.py`、`state.py`、`base.py` 和 `main_graph.py` 正是对这些账的逐步收敛。本节先完成其中最小骨架，真实 PDF、图片、切片和向量化留到后续章节。
+节点共享一个状态；状态字段就是上下游之间的约定。后面每增加一个节点，先看它从状态读取什么、向状态写什么。
 
 ---
 
-## 5. 阶段③ 逐个改造
+## 2. 术语只讲本节会遇到的
 
-### 5.1 第一个改动：把状态变成明确的数据契约
+### `TypedDict`
 
-为什么改：节点之间传递的是同一个状态。如果每个节点自己猜字段名，后面加节点时很容易出现“前一个节点写 `file_path`，后一个节点读 `import_file_path`”的问题。
+它仍然是字典，只是把字段名和类型写出来，方便 IDE 提示和读代码。它不会像 Pydantic 那样在运行时自动校验数据。
+
+```python
+class ImportGraphState(TypedDict):
+    import_file_path: str
+```
+
+### `deepcopy`
+
+`GRAPH_DEFAULT_STATE` 里有列表。每次创建任务时要复制出一份独立列表，否则两个任务可能共用同一个 `visited_nodes`。
+
+### 相对导入
+
+```python
+from .exceptions import ImportProcessError
+```
+
+`.` 表示当前包。这样 `BaseNode.py` 不依赖仓库根目录的绝对路径，包被 uv 安装后仍能找到同级模块。
+
+### `__call__`
+
+实现 `__call__` 后，节点对象可以这样调用：
+
+```python
+node(state)
+```
+
+这让节点对象可以直接交给工作流框架，同时把日志和异常处理集中在基类。
+
+### `raise ... from`
+
+```python
+raise ImportProcessError(...) from exc
+```
+
+前面的异常是对外统一的业务异常，`from exc` 保留原始异常链，排查问题时还能看到最初原因。
+
+---
+
+## 3. 阶段①：先读取真实工程，再确认代码能运行
+
+当前工程中已有以下真实文件：
+
+```text
+pyproject.toml
+src/shopkeeper_brain/processor/import_process/exceptions.py
+src/shopkeeper_brain/processor/import_process/state.py
+src/shopkeeper_brain/processor/import_process/BaseNode.py
+```
+
+先运行：
+
+```bash
+uv sync
+uv run python -m compileall -q src/shopkeeper_brain
+```
+
+预期效果：两个命令都以退出码 0 结束，没有 Python 语法错误。
+
+如果 `uv sync` 报错，先把完整错误原文发给我；不要自行修改项目配置，也不要把猜测的原因写进教程。
+
+---
+
+## 4. 阶段②：逐个看懂并手敲三个真实模块
+
+### 4.1 `exceptions.py`：让错误带上节点上下文
+
+参考项目后续会有配置错误、PDF 转换错误、向量化错误和存储错误。它们都继承一个导入流程基础异常。本节先保留最小版本。
+
+**文件**：`src/shopkeeper_brain/processor/import_process/exceptions.py`
+
+```python
+class ImportProcessError(Exception):
+    """导入流程的基础异常。"""
+
+    def __init__(
+            self,
+            message: str,
+            node_name: str = "",
+            cause: Exception | None = None,
+    ) -> None:
+        self.node_name = node_name
+        self.cause = cause
+        super().__init__(message)
+
+    def __str__(self) -> str:
+        prefix = f"[{self.node_name}] " if self.node_name else ""
+        cause = f" (原因: {self.cause})" if self.cause else ""
+        return f"{prefix}{super().__str__()}{cause}"
+```
+
+手敲时注意：
+
+- `Exception | None` 表示这个参数可以是异常对象，也可以是 `None`。
+- `super().__init__(message)` 调用父类 `Exception` 的初始化逻辑。
+- `__str__` 决定 `print(error)` 时显示什么内容。
+
+### 4.2 `state.py`：规定节点之间传递的字段
+
+当前阶段只保留骨架真正需要的字段。后面随着 PDF、切片和向量节点增加，再按真实业务增加字段。
 
 **文件**：`src/shopkeeper_brain/processor/import_process/state.py`
 
 ```python
 from copy import deepcopy
-from typing import TypedDict
+from typing import TypedDict, Unpack
 
 
-class ImportGraphState(TypedDict, total=False):
+class ImportGraphState(TypedDict):
     """导入流程中所有节点共享的状态。"""
 
     import_file_path: str
@@ -219,46 +182,25 @@ GRAPH_DEFAULT_STATE: ImportGraphState = {
 }
 
 
-def create_default_state(**overrides: object) -> ImportGraphState:
+def create_default_state(**overrides: Unpack[ImportGraphState]) -> ImportGraphState:
     """创建彼此隔离的状态副本，并允许调用方覆盖字段。"""
     state = deepcopy(GRAPH_DEFAULT_STATE)
     state.update(overrides)
     return state
 ```
 
-这里的 `deepcopy` 不是装饰。`visited_nodes` 是可变列表，如果直接复用全局模板，多个任务可能共享同一份列表；每次复制出独立状态才能避免任务之间互相污染。
+手敲时重点看：
 
-### 5.2 第二个改动：建立统一异常类型
+- `class ImportGraphState(TypedDict)` 只描述字典结构，不会生成实例对象。
+- `**overrides` 接收调用方传入的关键字参数。
+- `Unpack[ImportGraphState]` 告诉类型检查器：这些关键字应该来自状态字段。
+- `deepcopy` 保证每个任务的 `visited_nodes` 独立。
 
-为什么改：流程节点失败时，调用方至少需要知道“哪个节点失败”。先定义一个最小异常类型，后续再按配置、文件、向量和存储继续细分。
+### 4.3 `BaseNode.py`：统一每个节点的执行入口
 
-**文件**：`src/shopkeeper_brain/processor/import_process/exceptions.py`
+参考项目的每个节点都需要开始日志、执行 `process`、完成日志和异常包装。把固定步骤放进基类，具体业务留给子类。
 
-```python
-class ImportProcessError(Exception):
-    """导入流程的基础异常。"""
-
-    def __init__(
-        self,
-        message: str,
-        node_name: str = "",
-        cause: Exception | None = None,
-    ) -> None:
-        self.node_name = node_name
-        self.cause = cause
-        super().__init__(message)
-
-    def __str__(self) -> str:
-        prefix = f"[{self.node_name}] " if self.node_name else ""
-        cause = f" (原因: {self.cause})" if self.cause else ""
-        return f"{prefix}{super().__str__()}{cause}"
-```
-
-### 5.3 第三个改动：用节点基类收敛通用执行逻辑
-
-为什么改：参考项目的节点都需要“开始日志 → 执行业务 → 完成日志 → 统一包装异常”。把这段固定流程放进基类，子类只实现 `process`。
-
-**文件**：`src/shopkeeper_brain/processor/import_process/base.py`
+**文件**：`src/shopkeeper_brain/processor/import_process/BaseNode.py`
 
 ```python
 from abc import ABC, abstractmethod
@@ -268,13 +210,11 @@ from typing import TypeVar
 from .exceptions import ImportProcessError
 from .state import ImportGraphState
 
-
-StateT = TypeVar("StateT", bound=ImportGraphState)
+StateT = TypeVar('StateT', bound=ImportGraphState)
 
 
 class BaseNode(ABC):
     """所有导入节点共享的执行外壳。"""
-
     name = "base_node"
 
     def __init__(self) -> None:
@@ -294,7 +234,7 @@ class BaseNode(ABC):
                 message=str(exc),
                 node_name=self.name,
                 cause=exc,
-            ) from exc
+            )from exc
         self.logger.info("%s 完成", self.name)
         return result
 
@@ -304,215 +244,121 @@ class BaseNode(ABC):
         raise NotImplementedError
 ```
 
-这里对应参考项目里的模板方法思路：`__call__` 是固定骨架，`process` 是留给子类的变化点。代价是类的数量增加、初学者需要理解继承；换来的收益是每个节点的执行边界统一了。
+手敲时重点看：
 
-### 5.4 第四个改动：把分支交给 LangGraph 主图
+- `ABC` 和 `@abstractmethod` 规定子类必须实现 `process`。
+- `name` 是类属性，子类覆盖它后，基类日志自动带上节点名。
+- `node(state)` 实际会进入 `__call__`，再由 `__call__` 调用 `process`。
+- `except Exception` 会捕获普通异常并包装成 `ImportProcessError`；已经是业务异常时直接继续抛出。
 
-为什么改：直写版本把“调用谁”写在 `run_import` 里。LangGraph 的 `StateGraph` 让节点注册、顺序边和条件边集中在主图中，节点类只负责处理状态。
-
-**文件**：`src/shopkeeper_brain/processor/import_process/main_graph.py`
-
-```python
-from typing import Literal
-
-from langgraph.graph import END, START, StateGraph
-
-from .base import BaseNode
-from .state import ImportGraphState, create_default_state
-
-
-class NodeEntry(BaseNode):
-    """入口节点：判断输入文件类型。"""
-
-    name = "node_entry"
-
-    def process(self, state: ImportGraphState) -> ImportGraphState:
-        file_path = state["import_file_path"].lower()
-        state["visited_nodes"].append(self.name)
-
-        if file_path.endswith(".pdf"):
-            state["is_pdf_read_enabled"] = True
-        elif file_path.endswith(".md"):
-            state["is_md_read_enabled"] = True
-        else:
-            state["status"] = "unsupported"
-
-        return state
-
-
-class NodePdfToMd(BaseNode):
-    """模拟 PDF 转 Markdown，真实 MinerU 在后续章节接入。"""
-
-    name = "node_pdf_to_md"
-
-    def process(self, state: ImportGraphState) -> ImportGraphState:
-        state["visited_nodes"].append(self.name)
-        state["status"] = "markdown_ready"
-        return state
-
-
-def route_after_entry(
-    state: ImportGraphState,
-) -> Literal["node_pdf_to_md", "__end__"]:
-    """根据入口节点写入的标记选择下一步。"""
-    if state.get("is_pdf_read_enabled"):
-        return "node_pdf_to_md"
-    return END
-
-
-workflow = StateGraph(ImportGraphState)
-workflow.add_node("node_entry", NodeEntry())
-workflow.add_node("node_pdf_to_md", NodePdfToMd())
-workflow.add_edge(START, "node_entry")
-workflow.add_conditional_edges(
-    "node_entry",
-    route_after_entry,
-    {
-        "node_pdf_to_md": "node_pdf_to_md",
-        END: END,
-    },
-)
-workflow.add_edge("node_pdf_to_md", END)
-
-kb_import_app = workflow.compile()
-
-
-def run_import(import_file_path: str) -> ImportGraphState:
-    """给外部调用方的最小执行入口。"""
-    initial_state = create_default_state(import_file_path=import_file_path)
-    return kb_import_app.invoke(initial_state)
-
-
-if __name__ == "__main__":
-    for file_path in ("manual.pdf", "manual.md", "manual.txt"):
-        print(file_path, "->", run_import(file_path))
-```
-
-LangGraph 当前官方用法也是“先用 `StateGraph` 注册状态、节点和边，再 `compile()`，最后 `invoke()` 或 `stream()`”。这里的条件边只把 PDF 导向模拟转换节点，Markdown 和其他格式先结束；下一节再加入更完整的入口路由和后续节点。
+本节不为 `BaseNode` 虚构业务子类。等入口节点真正出现后，再用真实节点验证这条调用链。
 
 ---
 
-## 6. 验证汇总
+## 5. 阶段③：真实验证步骤
 
-### 6.1 环境与依赖
+本节不新增测试文件。你按下面步骤操作，把真实终端输出发给我；每一步都给出预期效果。
 
-```bash
-uv --version
-python --version
-uv run python -c "from importlib.metadata import version; print(version('langgraph'))"
-```
+### 5.1 语法和模块导入
 
-本次摸底实测：
-
-- `uv --version`：`uv 0.12.13`
-- `python --version`：`Python 3.12.9`
-- `uv init --python 3.11 --name shopkeeper-brain ...`：已在 `workspace/verification/day01/project` 实测通过。
-- `UV_DEFAULT_INDEX=... uv add langgraph`：已在 workspace 实测通过，安装 `langgraph 1.2.20`。
-- 在当前仓库根目录执行 `uv init`、`uv add` 和 `uv run`：未执行，等你开始手敲本节时执行。
-
-### 6.2 行为验证
-
-在仓库根目录完成手敲后运行：
+运行：
 
 ```bash
-uv run python -m shopkeeper_brain.processor.import_process.probe
-uv run python -m shopkeeper_brain.processor.import_process.main_graph
+uv run python -m compileall -q src/shopkeeper_brain
+uv run python -c "from shopkeeper_brain.processor.import_process.BaseNode import BaseNode; from shopkeeper_brain.processor.import_process.exceptions import ImportProcessError; from shopkeeper_brain.processor.import_process.state import create_default_state; print(BaseNode.__name__, ImportProcessError.__name__, create_default_state()['status'])"
 ```
 
-预期行为：
+预期效果：
 
-| 输入 | 经过节点 | 最终状态 |
-| --- | --- | --- |
-| `manual.pdf` | `node_entry → node_pdf_to_md` | `markdown_ready` |
-| `manual.md` | `node_entry` | `created` |
-| `manual.txt` | `node_entry` | `unsupported` |
-
-`workspace/verification/day01/project` 实测输出：
+- 两条命令退出码都是 0。
+- 第二条命令输出包含：
 
 ```text
-manual.pdf -> {'import_file_path': 'manual.pdf', 'is_pdf_read_enabled': True, 'is_md_read_enabled': False, 'visited_nodes': ['node_entry', 'node_pdf_to_md'], 'status': 'markdown_ready'}
-manual.md -> {'import_file_path': 'manual.md', 'is_pdf_read_enabled': False, 'is_md_read_enabled': True, 'visited_nodes': ['node_entry'], 'status': 'created'}
-manual.txt -> {'import_file_path': 'manual.txt', 'is_pdf_read_enabled': False, 'is_md_read_enabled': False, 'visited_nodes': ['node_entry'], 'status': 'unsupported'}
+BaseNode ImportProcessError created
 ```
 
-请在你手敲后把自己的真实输出贴到会话中；验收时我会从你的实际文件和实际输出判断结果，以上输出只代表本次 workspace 验证。
+### 5.2 状态工厂的独立性
 
-### 6.3 破坏性实验
+运行：
 
-改坏了什么：在 `main_graph.py` 的 `route_after_entry` 中，把：
+```bash
+uv run python -c "from shopkeeper_brain.processor.import_process.state import create_default_state; first=create_default_state(); second=create_default_state(); first['visited_nodes'].append('first'); assert second['visited_nodes']==[], second['visited_nodes']; print('状态隔离验证通过')"
+```
+
+预期效果：输出：
+
+```text
+状态隔离验证通过
+```
+
+这一步验证的是 `deepcopy` 的真实行为：第一个任务追加节点后，第二个任务仍然拥有空列表。
+
+### 5.3 异常对象的信息
+
+运行：
+
+```bash
+uv run python -c "from shopkeeper_brain.processor.import_process.exceptions import ImportProcessError; error=ImportProcessError('读取失败', node_name='node_entry', cause=ValueError('文件不存在')); assert str(error)=='[node_entry] 读取失败 (原因: 文件不存在)'; print(error)"
+```
+
+预期效果：输出：
+
+```text
+[node_entry] 读取失败 (原因: 文件不存在)
+```
+
+这一步只验证异常对象当前已经实现的格式，不模拟任何文件读取。
+
+### 5.4 破坏性验证：确认状态隔离真的被保护
+
+1. 打开 `src/shopkeeper_brain/processor/import_process/state.py`。
+2. 把：
 
 ```python
-if state.get("is_pdf_read_enabled"):
-    return "node_pdf_to_md"
+state = deepcopy(GRAPH_DEFAULT_STATE)
 ```
 
 临时改成：
 
 ```python
-if True:
-    return "node_pdf_to_md"
+state = GRAPH_DEFAULT_STATE
 ```
 
-先运行：
+3. 重新运行 5.2 的状态隔离命令。
 
-```bash
-uv run python -m shopkeeper_brain.processor.import_process.main_graph
-```
-
-预期：`manual.md` 和 `manual.txt` 也会错误地经过 `node_pdf_to_md`，说明路由条件被破坏。
-
-workspace 实测的破坏结果：
+预期效果：命令失败，并出现类似下面的断言信息：
 
 ```text
-manual.md -> {'import_file_path': 'manual.md', 'is_pdf_read_enabled': False, 'is_md_read_enabled': True, 'visited_nodes': ['node_entry', 'node_pdf_to_md'], 'status': 'markdown_ready'}
-manual.txt -> {'import_file_path': 'manual.txt', 'is_pdf_read_enabled': False, 'is_md_read_enabled': False, 'visited_nodes': ['node_entry', 'node_pdf_to_md'], 'status': 'markdown_ready'}
+AssertionError: ['first']
 ```
 
-恢复原代码后再次运行，Markdown 和 TXT 不再进入 PDF 节点；恢复后的 `main_graph.py` SHA-256 为 `6f518b03d692ed6cf1c191f3b0b319168275cbefa33faba5fc247b3be25ea213`。
+这说明两个状态错误地共享了同一个列表。
 
-### 6.4 本节踩的坑
+4. 恢复为 `deepcopy`。
+5. 再次运行 5.2，预期重新输出 `状态隔离验证通过`。
 
-1. 现象：参考环境准备笔记使用 `uv.toml` 的 `index-url` 写法。
-   原因：参考资料与当前 uv 版本的推荐配置方式存在时间差。
-   处理：本节采用当前 uv 文档的 `[[tool.uv.index]]` 写法；参考资料原文作为差异记录保留，不修改 reference。
-
-2. 现象：本机默认 Python 是 3.12.9，而参考项目要求 Python 3.11。
-   原因：系统解释器版本和项目声明版本不是一回事。
-   处理：用 `uv init --python 3.11` 为项目声明 Python 3.11；是否已经安装并实际使用 3.11，以你运行 `uv run` 的输出为准。
-
-3. 现象：`import langgraph; print(langgraph.__version__)` 报 `AttributeError: module 'langgraph' has no attribute '__version__'`。
-   原因：当前 LangGraph 包没有暴露 `__version__` 模块属性。
-   处理：使用 `from importlib.metadata import version; print(version('langgraph'))` 查询已安装分发版本；workspace 实测输出为 `1.2.20`。
+本节不验证 `BaseNode.__call__` 的完整执行过程，因为当前工程还没有真实入口节点；下一节出现入口节点后再验证，不提前写临时业务类。
 
 ---
 
-## 7. 小结
+## 6. 小结
 
 如果只记三件事：
 
-1. RAG 项目先处理文档，再做检索和答案生成；导入流程是后续问答质量的基础。
-2. 状态是节点之间的数据契约；节点负责业务，主图负责顺序和分支。
-3. `BaseNode.__call__` 用固定执行外壳包住 `process`，这是从重复函数走向工程化节点的关键一步。
+1. 掌柜智库先把文档加工成可检索知识，再进入检索和答案生成。
+2. `state.py` 是节点之间的数据契约，`BaseNode.py` 是节点统一执行入口，`exceptions.py` 负责保留失败上下文。
+3. 验证要直接打到真实模块：本节验证状态工厂和异常对象；真实节点出现后再验证节点执行。
 
 ### 对照参考项目
 
-| 维度 | 参考项目 | 本节重建 | 为什么 |
-| --- | --- | --- | --- |
-| 顶层包名 | `knowledge` | `shopkeeper_brain` | 使用已确认的新项目命名，其余目录职责保持一致 |
-| 状态定义 | `ImportGraphState` + 默认状态工厂 | 同样采用 | 保留原项目的状态契约思路 |
-| 节点接口 | `BaseNode.__call__` + `process` | 同样采用 | 保留模板方法和可调用对象设计 |
-| 真实 PDF 处理 | MinerU | 暂用模拟节点 | 本节只验证流程骨架，真实工具放到 PDF 章节 |
-| 运行方式 | LangGraph `compile` 后执行 | 同样采用 | 对齐当前 LangGraph 官方 API |
-| 镜像配置 | 参考笔记使用 `uv.toml` | 使用当前 `pyproject.toml` 的 uv 配置 | 参考写法与当前 uv 推荐方式有时间差 |
+| 维度 | 参考项目 | 当前学习工程 |
+| --- | --- | --- |
+| 状态 | `ImportGraphState` + 默认状态工厂 | 保持同样的字段契约和深拷贝方式 |
+| 异常 | `ImportProcessError` 携带节点名和原因 | 保持同样的错误信息结构 |
+| 节点基类 | `BaseNode.__call__` 调用 `process` | 保持同样的调用关系 |
+| 真实业务节点 | 入口、PDF、图片、切片、向量化、入库 | 下一节开始逐个手敲 |
+| 本节验证 | 验证基础模块已有行为 | 不新增测试文件，不提前验证外部服务 |
 
 ### 下一节预告
 
-**第 2 节：uv 环境与项目配置。** 这一节留下的问题是：状态和节点已经能跑，但配置、异常层级、日志和入口节点还没有按项目方式组织；下一节会把这些基础设施补齐，再验证文件类型路由。
-
----
-
-## 给下一次会话的开始提示词
-
-```text
-继续 shopkeeper-brain 带练重建。先读取 AGENTS.md、docs/AGENTS.md、reference/AGENTS.md 和 docs/memory/learning-progress.md。当前进行第 1 节《项目定位与最小骨架》的手敲与验收：请读取我真实写出的文件，在 workspace/verification/ 下复制并实跑 uv 命令、两个流程探针和一次破坏性路由实验。不要修改 reference/，不要直接替我写学习代码。验收按“必须改 / 建议改 / 可选”反馈；通过后再更新进度和记忆，不要提前开始第 2 节。
-```
+**第 2 节：入口节点与文件类型路由。** 下一节会手敲参考项目里的真实入口节点，使用真实文件路径验证 PDF、Markdown 和不支持格式的分支状态；不提前写 PDF 转换流程。
