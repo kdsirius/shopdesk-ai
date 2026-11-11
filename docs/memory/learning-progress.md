@@ -11,9 +11,9 @@
 | 新项目 | `shopkeeper-brain` |
 | Python 包 | `shopkeeper_brain` |
 | 参考项目 | `reference/掌教智库/` |
-| 构建命令 | 未确定，尚未运行 |
-| 测试命令 | 未确定，尚未运行 |
-| 最近实测基线 | 未运行；当前尚未建立学习代码工程 |
+| 构建命令 | `uv sync` + `uv run python -m compileall -q src/shopkeeper_brain`（当前环境需显式指定可用 Python） |
+| 测试命令 | 无自动化测试；使用直接 Python 验证命令和破坏性实验 |
+| 最近实测基线 | compileall、模块导入、状态隔离、异常格式均通过；破坏性实验按预期失败后恢复 |
 
 ## 章节表
 

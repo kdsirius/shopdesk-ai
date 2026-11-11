@@ -3,6 +3,7 @@
 - 验收日期：2026-11-11
 - 验收副本：`workspace/verification/day01/user-project/`
 - 用户真实文件：`exceptions.py`、`state.py`、`BaseNode.py`、`pyproject.toml`
+- 代码提交：`b55e156 feat: 完成第1节导入骨架`
 - 自动化测试：本节按约定未新增测试文件
 
 ## 验证结果
