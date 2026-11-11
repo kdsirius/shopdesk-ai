@@ -8,7 +8,7 @@
 ## 首轮审阅
 
 - 编译、模块导入、PDF/Markdown 分支、路由和异常分支均通过。
-- 破坏性实验：将 PDF 路由临时改为 Markdown 路由后，真实路由断言按预期失败，恢复后通过。
+- AI 内部验收曾在隔离副本中将 PDF 路由临时改为 Markdown 路由，真实路由断言按预期失败，恢复后通过；该实验不属于用户操作步骤。
 - 发现必须修改项：`StateFieldError` 接收 `field_name` 但没有保存，调用方读取 `exc.field_name` 时出现 `AttributeError`。
 
 ## 修订后验证
@@ -22,7 +22,7 @@
 - 缺失路径：抛出 `StateFieldError`，字段名为 `import_file_path`：通过。
 - 同一个状态对象由 PDF 重用为 Markdown：旧 PDF 路径清理、标记切换：通过。
 - `BaseNode` 普通异常包装：`cause` 和 `__cause__` 均保留原始异常：通过。
-- 破坏性实验：将 PDF 路由改为 `node_md_img` 后断言失败；恢复后编译和路由验证通过。
+- AI 内部破坏性实验：将隔离副本中的 PDF 路由改为 `node_md_img` 后断言失败；恢复后编译和路由验证通过。用户未执行该实验。
 - 外部服务：PDF 解析、模型、Milvus、MinIO、MongoDB：跳过，本节未接入。
 
 ## 结论
