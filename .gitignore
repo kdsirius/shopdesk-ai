@@ -5,3 +5,6 @@ workspace/
 /.venv/
 /documents/
 /temp/
+src/shopkeeper_brain/**/__pycache__/
+__pycache__/
+*.py[cod]
