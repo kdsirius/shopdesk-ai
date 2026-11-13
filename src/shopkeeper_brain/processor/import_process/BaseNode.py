@@ -34,6 +34,6 @@ class BaseNode(ABC):
         return result
 
     @abstractmethod
-    def process(self, state: StateT) -> StateT:
+    def process(self, state: ImportGraphState) -> ImportGraphState:
         """子类实现具体业务。"""
         raise NotImplementedError

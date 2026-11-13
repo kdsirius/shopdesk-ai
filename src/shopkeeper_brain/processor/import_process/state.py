@@ -11,6 +11,8 @@ class ImportGraphState(TypedDict):
     pdf_path: str
     md_path: str
     file_title: str
+    file_dir: str
+    md_content: str
     visited_nodes: list[str]
     status: str
 
@@ -22,6 +24,8 @@ GRAPH_DEFAULT_STATE: ImportGraphState = {
     "pdf_path": "",
     "md_path": "",
     "file_title": "",
+    "file_dir": "",
+    "md_content": "",
     "visited_nodes": [],
     "status": "created",
 }

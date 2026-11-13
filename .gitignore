@@ -1,3 +1,7 @@
 workspace/
 /reference/
 .idea/
+.env
+/.venv/
+/documents/
+/temp/
