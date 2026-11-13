@@ -5,6 +5,8 @@
 - 用户真实运行入口：`src/shopkeeper_brain/processor/import_process/nodes/node_pdf_to_md.py::__main__`
 - 隔离验收副本：`workspace/verification/day03/user-project-rerun-20261113/`
 - 自动化测试：本节没有新增自动化测试文件；测试条数记为无自动化测试。
+- 学习代码提交：`16ae65a feat: 完成 PDF 转 Markdown 导入节点`
+- 教程与收尾文档提交：`8ccd1eb docs: 完成第 3 节 PDF 转 Markdown 教程与验收收尾`
 
 ## 用户真实 MinerU 验证
 
