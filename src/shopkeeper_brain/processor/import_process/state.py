@@ -14,6 +14,7 @@ class ImportGraphState(TypedDict):
     file_dir: str
     md_content: str
     chunks: list[dict[str, object]]
+    item_name: str
     visited_nodes: list[str]
     status: str
 
@@ -28,6 +29,7 @@ GRAPH_DEFAULT_STATE: ImportGraphState = {
     "file_dir": "",
     "md_content": "",
     "chunks": [],
+    "item_name":"",
     "visited_nodes": [],
     "status": "created",
 }
