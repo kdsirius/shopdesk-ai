@@ -14,7 +14,7 @@
 
 ## 固定教学方式
 
-本项目沿用 `E:/dev/java/group-buy-market/group-buy-market` 的教学方法，以本项目 [第 3 节](study/day03-PDF转Markdown流程.md) 为直接写作样例；长期偏好见 [教学记忆](memory/teaching-preferences.md)。团购工程整体只读，只借鉴讲法，不照搬其 Java 工具链、业务或本项目未授权的行为。
+本项目沿用 `E:/dev/java/group-buy-market/group-buy-market` 的教学方法，以本项目 [第 6 节](study/day06-主体识别.md) 为用户最新确认的固定写作样例，[第 3 节](study/day03-PDF转Markdown流程.md) 为补充参照；长期偏好见 [教学记忆](memory/teaching-preferences.md)。后续授课按第 6 节的讲解顺序、代码旁推导和 IDE 真实验证操作展开。团购工程整体只读，只借鉴讲法，不照搬其 Java 工具链、业务或本项目未授权的行为。
 
 - 开头只用一两句交代上一节留下什么、本节解决什么和资料入口；正文只保留三个一级业务板块：`## 一、业务流程与设计原因`、`## 二、手敲步骤`、`## 三、必做真实验证`。
 - 业务块从真实输入和状态变化推导设计，讲清“缺什么 → 直接写会怎样 → 为什么这样拆”。必要的 Python 语法、框架 API 和术语贴着代码短讲，不独立开术语课。

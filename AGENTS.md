@@ -7,7 +7,7 @@
 - 修改任何文件前先读取真实内容；`reference/` 目录始终只读。
 - 用户负责手敲学习代码；AI 负责参考资料摸底、施工图纸、文档记忆和验收。
 - 本项目不使用子 agent；资料读取、教程编写、审阅和验证均由当前会话直接完成，不启动子 agent 或多 agent 工作流。
-- 教学方式以 `docs/AGENTS.md` 和 `docs/memory/teaching-preferences.md` 为准；第 3 节是本项目已认可的写法样例，不能被通用技能模板覆盖。团购项目 `E:/dev/java/group-buy-market/group-buy-market` 仅供只读对照，不修改其中任何文件或 Git 状态。
+- 教学方式以 `docs/AGENTS.md` 和 `docs/memory/teaching-preferences.md` 为准；第 6 节是用户最新确认的固定教学样例，后续沿用其讲解、手敲与 IDE 真实验证方式，第 3 节作为补充参照，不能被通用技能模板覆盖。团购项目 `E:/dev/java/group-buy-market/group-buy-market` 仅供只读对照，不修改其中任何文件或 Git 状态。
 - Git 只允许 `status`、`log`、`diff`、`check-ignore` 等只读操作；不执行提交、推送、重置、删除或清理。
 - `workspace/` 是唯一实验区，临时脚本、复制工程、日志和测试输出统一放在这里。
 - 密钥放本地 `.env` 或环境变量，提交模板使用 `.env.example`，不得把可用密钥写进文档。
