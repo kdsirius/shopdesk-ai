@@ -15,7 +15,8 @@
 
 ## 当前接手快照
 
-- 第 1 至第 4 节已通过；当前下一节是第 5 节“文档切片”，对应 `reference/掌教智库/4.视频/day05/`。
+- 第 1 至第 5 节已通过；当前第 6 节是“主体识别”，按业务 day06 组织。
+- 参考资料物理目录存在错位：`4.视频/day06/`仍是文档切片，主体识别主题和实现分布在 day07/day08；本节已按该事实整理教程。
 - 进度唯一来源：`docs/memory/learning-progress.md`；第 4 节详细证据：`docs/memory/day04-acceptance.md`；第 4 节施工图纸：`docs/study/day04-Markdown图片处理.md`。
 - 第 4 节的用户实现入口是 `src/shopkeeper_brain/processor/import_process/nodes/node_md_img.py::__main__`，正式主图尚未接入，`__main__` 仍是学习期真实验证入口。
 - `NodeMdImg` 已通过真实 Markdown 图片筛选、VL 摘要、MinIO 上传、匿名只读策略、远程 URL 替换、`_new.md` 保存和状态回写；真实输入结果为 16 个图片文件、13 个 Markdown 引用、3 个未引用文件。
