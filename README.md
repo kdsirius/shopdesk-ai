@@ -6,9 +6,9 @@
 
 ## 现有实现与运行入口
 
-学习代码位于 [src/shopkeeper_brain](src/shopkeeper_brain/)，包括入口路由、PDF 转 Markdown、图片摘要与 MinIO 替换、文档切片、主体识别，以及 BGE-M3 名称和切片双向量化。真实验证的范围与限制见各节验收记录，最近的记录为 [第 7 节验收](docs/memory/day07-acceptance.md)。
+学习代码位于 [src/shopkeeper_brain](src/shopkeeper_brain/)，包括入口路由、PDF 转 Markdown、图片摘要与 MinIO 替换、文档切片、主体识别、BGE-M3 名称和切片双向量化，以及 Milvus 主体名称与 Chunk 入库。真实验证的范围与限制见各节验收记录，最近的记录为 [第 8 节验收](docs/memory/day08-acceptance.md)。
 
-当前主要通过各节点文件中的学习期 `__main__` 在 IDE 中运行。[main_graph.py](src/shopkeeper_brain/processor/import_process/main_graph.py) 目前提供入口后的路由函数；声明的命令行入口仍是脚手架问候，正式导入主图、HTTP 服务、检索与前端按学习进度逐节接入。
+当前主要通过各节点文件中的学习期 `__main__` 在 IDE 中运行。最近的真实入库入口为 [node_import_milvus.py](src/shopkeeper_brain/processor/import_process/nodes/node_import_milvus.py)，先保存主体名称，再批量保存 Chunk 并回填主键。[main_graph.py](src/shopkeeper_brain/processor/import_process/main_graph.py) 仍只提供入口后的路由函数；声明的命令行入口仍是脚手架问候，正式导入主图、HTTP 服务、检索与前端按学习进度逐节接入。
 
 ## 环境准备
 
@@ -26,6 +26,8 @@ IDE 选择本工程 uv 解释器，具体输入、配置、运行位置与观察
 
 BGE-M3 的实际路线是 CPU/FP32，模型准备和配置见 [第 7 节教程](docs/study/day07-向量化与稀疏向量.md)。本地模型位于 `workspace/models/bge-m3/`；该目录及运行产物被 Git 忽略，新环境需要自行准备，不能把缓存目录名当作权重已经齐全。
 
+第 8 节使用虚拟机上的 Milvus `http://192.168.150.120:19530`；验收时服务端为 2.5.5、PyMilvus 为 3.0.3。主体集合为 `kb_item_names`，正文集合为 `kb_chunks`，配置变量见 [.env.example](.env.example)，运行方法见 [第 8 节教程](docs/study/day08-Milvus向量入库.md)。后续使用前只读确认虚拟机、连接和集合状态，不重新部署或清空已有服务；历史验收不代表服务此刻在线。
+
 ## 文档与目录
 
 | 入口 | 内容 |
@@ -41,8 +43,10 @@ BGE-M3 的实际路线是 CPU/FP32，模型准备和配置见 [第 7 节教程](
 
 ## 导入产物如何衔接
 
-第 5 节原始 `chunks.json` 保留切片结果；第 6 节的 `item_name` 回填发生在内存中。第 7 节入口显式恢复主体标签并完成向量化，另存 `workspace/day07-real-run/state_vector.json`，包含名称双向量和全部 Chunk 的双向量；后续入库应从这份新状态衔接。
+第 5 节原始 `chunks.json` 保留切片结果；第 6 节的 `item_name` 回填发生在内存中。第 7 节入口显式恢复主体标签并完成向量化，另存 `workspace/day07-real-run/state_vector.json`，包含名称双向量和全部 Chunk 的双向量；第 8 节直接读取这份状态，分别写入两个 Milvus 集合。
+
+第 8 节只在返回的 `state["chunks"]` 中回填 `chunk_id`，没有覆盖第 7 节备份，也没有另存含主键的新 JSON。后续查询使用数据库中的真实主键，不能假定旧备份已经有 `chunk_id`。两个集合均按 `file_title` 删除旧记录后插入，重复导入会生成新主键；该过程不具备跨删除和插入的事务回滚。
 
 稀疏向量在内存中使用整数特征编号，JSON 对象键会变成字符串；读取备份后需恢复整数键。Dense 为 1024 维并做 L2 归一化，Sparse 保留模型原权重，不能照搬 Dense 的单位范数要求。
 
-参考项目还包括 Milvus 持久化、检索、融合重排和 Web 交互等后续能力，其实现与验证按学习进度推进。安装了 PyMilvus 模型工具并不代表 Milvus 数据库已经验证。
+Milvus 两类数据的真实入库、索引、重复导入和主键回填已在第 8 节验收；名称查询、正文检索、融合重排和 Web 交互等能力仍按学习进度推进，不能把入库通过当作查询链路已经就绪。
