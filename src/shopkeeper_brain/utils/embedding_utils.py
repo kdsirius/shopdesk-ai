@@ -6,7 +6,7 @@ from shopkeeper_brain.processor.import_process.exceptions import ConfigurationEr
 _bge_m3_ef: BGEM3EmbeddingFunction | None = None
 
 
-def get_beg_m3_ef() -> BGEM3EmbeddingFunction:
+def get_bge_m3_ef() -> BGEM3EmbeddingFunction:
     """首次调用加载本地模型，后续批次复用同一实例。"""
     global _bge_m3_ef
     if _bge_m3_ef is not None:
@@ -46,7 +46,7 @@ def generate_embeddings(texts: list[str]) -> dict[str, list]:
     if any(not isinstance(text, str) or not text.strip() for text in texts):
         raise ValueError("向量化输入必须是非空文本列表")
 
-    model = get_beg_m3_ef()
+    model = get_bge_m3_ef()
     embeddings = model.encode_documents(texts)
     sparse = embeddings["sparse"]
     processed_sparse: list[dict[int, float]] = []

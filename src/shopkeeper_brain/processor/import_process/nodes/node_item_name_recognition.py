@@ -4,13 +4,20 @@ from pathlib import Path
 
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_openai import ChatOpenAI
-from pymilvus.client.field_data_extractors import dense_vector_width
+from pymilvus import MilvusClient, DataType
 
 from shopkeeper_brain.core.llm_config import load_llm_config
+from shopkeeper_brain.core.milvus_config import load_milvus_config
 from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
-from shopkeeper_brain.processor.import_process.exceptions import StateFieldError
+from shopkeeper_brain.processor.import_process.exceptions import StateFieldError, ConfigurationError, ValidationError, \
+    ImportProcessError, MilvusError
 from shopkeeper_brain.processor.import_process.state import ImportGraphState, create_default_state
 from shopkeeper_brain.utils.embedding_utils import generate_embeddings
+from shopkeeper_brain.utils.milvus_utils import (
+    escape_milvus_string,
+    get_milvus_client,
+    restore_sparse_vector
+)
 
 ITEM_NAME_CHUNK_K = 3
 ITEM_NAME_CONTEXT_MAX_CHARS = 2500
@@ -29,6 +36,7 @@ class NodeItemNameRecognition(BaseNode):
         dense_vector, sparse_vector = self._step_5_generate_vectors(item_name)
         state["item_name_dense_vector"] = dense_vector
         state["item_name_sparse_vector"] = sparse_vector
+        self._step_6_save_to_milvus(file_title, item_name, dense_vector, sparse_vector, )
         self.logger.info("主体字段处理完成：%s", item_name)
         return state
 
@@ -122,6 +130,102 @@ class NodeItemNameRecognition(BaseNode):
         """单独编码产品名称，供产品确认所需的名称数据使用。"""
         vectors = generate_embeddings([item_name])
         return vectors["dense"][0], vectors["sparse"][0]
+
+    def _step_6_save_to_milvus(self, file_title: str, item_name: str, dense_vector: list[float],
+                               sparse_vector: dict[int, float]) -> None:
+        """按文件标题幂等保存一条主体名称记录。"""
+        config = load_milvus_config()
+        if not config.item_name_collection:
+            raise ConfigurationError(
+                "主体名称集合未配置，请检查 "
+                "SHOPKEEPER_BRAIN_MILVUS_ITEM_NAME_COLLECTION",
+                node_name=self.name,
+            )
+        if not isinstance(file_title, str) or not file_title.strip():
+            raise StateFieldError(node_name=self.name, field_name="file_title", expected_type=str, )
+        if not isinstance(item_name, str) or not item_name.strip():
+            raise StateFieldError(node_name=self.name, field_name="item_name", expected_type=str, )
+        if not isinstance(dense_vector, list) or len(dense_vector) != 1024:
+            raise ValidationError(message="主体名称 Dense 向量必须是 1024 维列表", node_name=self.name, )
+
+        restored_sparse = restore_sparse_vector(sparse_vector, "item_name_sparse_vector")
+        try:
+            client = get_milvus_client()
+            if not client.has_collection(config.item_name_collection):
+                self._create_item_name_collection(client, config.item_name_collection)
+            safe_file_title = escape_milvus_string(file_title)
+            client.delete(collection_name=config.item_name_collection, filter=f'file_title == "{safe_file_title}"')
+
+            result = client.insert(
+                collection_name=config.item_name_collection,
+                data=[{
+                    "file_title": file_title,
+                    "item_name": item_name,
+                    "dense_vector": dense_vector,
+                    "sparse_vector": restored_sparse
+                }]
+            )
+        except ImportProcessError:
+            raise
+        except Exception as exc:
+            raise MilvusError(message="主体名称写入 Milvus 失败", node_name=self.name, cause=exc) from exc
+        inserted_ids = result.get("ids", [])
+        if result.get("insert_count") != 1 or len(inserted_ids) != 1:
+            raise MilvusError(message="主体名称写入 Milvus 后返回的主键数量不正确", node_name=self.name)
+
+    def _create_item_name_collection(self, client: MilvusClient, collection_name: str) -> None:
+        """创建主体名称集合及 Dense/Sparse 两类索引。"""
+        schema = client.create_schema(auto_id=True, enable_dynamic_field=False)
+        schema.add_field(
+            field_name="pk",
+            datatype=DataType.INT64,
+            is_primary=True,
+            auto_id=True,
+        )
+        schema.add_field(
+            field_name="file_title",
+            datatype=DataType.VARCHAR,
+            max_length=65535,
+        )
+        schema.add_field(
+            field_name="item_name",
+            datatype=DataType.VARCHAR,
+            max_length=65535,
+        )
+        schema.add_field(
+            field_name="dense_vector",
+            datatype=DataType.FLOAT_VECTOR,
+            dim=1024,
+        )
+        schema.add_field(
+            field_name="sparse_vector",
+            datatype=DataType.SPARSE_FLOAT_VECTOR,
+        )
+
+        index_params = client.prepare_index_params()
+        index_params.add_index(
+            field_name="dense_vector",
+            index_name="dense_vector_index",
+            index_type="AUTOINDEX",
+            metric_type="COSINE",
+        )
+        index_params.add_index(
+            field_name="sparse_vector",
+            index_name="sparse_vector_index",
+            index_type="SPARSE_INVERTED_INDEX",
+            metric_type="IP",
+            params={
+                "inverted_index_algo": "DAAT_MAXSCORE",
+                "normalize": True,
+                "quantization": "none",
+            }
+        )
+
+        client.create_collection(
+            collection_name=collection_name,
+            schema=schema,
+            index_params=index_params
+        )
 
 
 if __name__ == '__main__':
