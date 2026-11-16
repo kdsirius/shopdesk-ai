@@ -4,15 +4,16 @@ from pathlib import Path
 
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_openai import ChatOpenAI
+from pymilvus.client.field_data_extractors import dense_vector_width
 
 from shopkeeper_brain.core.llm_config import load_llm_config
 from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
 from shopkeeper_brain.processor.import_process.exceptions import StateFieldError
 from shopkeeper_brain.processor.import_process.state import ImportGraphState, create_default_state
+from shopkeeper_brain.utils.embedding_utils import generate_embeddings
 
 ITEM_NAME_CHUNK_K = 3
 ITEM_NAME_CONTEXT_MAX_CHARS = 2500
-
 
 
 class NodeItemNameRecognition(BaseNode):
@@ -25,6 +26,9 @@ class NodeItemNameRecognition(BaseNode):
         context = self._step_2_build_context(chunks)
         item_name = self._step_3_call_llm(file_title, context)
         self._step_4_update_chunks(state, chunks, item_name)
+        dense_vector, sparse_vector = self._step_5_generate_vectors(item_name)
+        state["item_name_dense_vector"] = dense_vector
+        state["item_name_sparse_vector"] = sparse_vector
         self.logger.info("主体字段处理完成：%s", item_name)
         return state
 
@@ -113,6 +117,11 @@ class NodeItemNameRecognition(BaseNode):
         for chunk in chunks:
             chunk["item_name"] = item_name
         state["chunks"] = chunks
+
+    def _step_5_generate_vectors(self, item_name: str) -> tuple[list[float], dict[int, float]]:
+        """单独编码产品名称，供产品确认所需的名称数据使用。"""
+        vectors = generate_embeddings([item_name])
+        return vectors["dense"][0], vectors["sparse"][0]
 
 
 if __name__ == '__main__':

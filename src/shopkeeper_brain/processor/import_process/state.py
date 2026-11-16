@@ -15,6 +15,8 @@ class ImportGraphState(TypedDict):
     md_content: str
     chunks: list[dict[str, object]]
     item_name: str
+    item_name_dense_vector: list[float]
+    item_name_sparse_vector: dict[int, float]
     visited_nodes: list[str]
     status: str
 
@@ -29,7 +31,9 @@ GRAPH_DEFAULT_STATE: ImportGraphState = {
     "file_dir": "",
     "md_content": "",
     "chunks": [],
-    "item_name":"",
+    "item_name": "",
+    "item_name_dense_vector": [],
+    "item_name_sparse_vector": {},
     "visited_nodes": [],
     "status": "created",
 }
