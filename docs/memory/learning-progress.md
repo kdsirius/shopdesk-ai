@@ -30,7 +30,7 @@
 | 08 | Milvus 向量入库 | 已通过 | 2026-11-16 | 无自动化测试 | 首轮真实入库、索引、幂等与主键对应通过；三项问题经用户修订并定向复验通过，详见 day08-acceptance.md |
 | 09 | 检索流程骨架与产品确认 | 已通过 | 2026-11-17 | 无自动化测试 | 首轮发现缺 `continue`、主图位置、提示词缩进三处不一致，用户修订后复验 23 项通过；真实 MongoDB、Milvus 与文本模型均有证据，详见 [验收记录](day09-acceptance.md)、[备课记录](day09-preparation.md) |
 | 10 | 向量库检索 | 已通过 | 2026-11-17 | 无自动化测试 | 对应 day11 视频 02 至 06（day10 视频讲的是第 9 节）；用户源码隔离验收全部通过，没有必须修改项，详见 [验收记录](day10-acceptance.md)、[备课记录](day10-preparation.md) |
-| 11 | HyDE 与网络搜索 | 未开始 |  |  | 对应 day11 |
+| 11 | HyDE 与网络搜索 | 已通过 | 2026-11-17 | 无自动化测试 | 对应 day11 视频 08 至 17、笔记 `14`、`15`；联网搜索改用 Tavily 远程 MCP。首轮发现一处错误导入（指向 workspace 实验目录）和一处缺 `.strip()`，用户修订后复验通过，详见 [验收记录](day11-acceptance.md)、[备课记录](day11-preparation.md) |
 | 12 | RRF 融合与 Rerank 重排 | 未开始 |  |  | 对应 day12 |
 | 13 | Web 服务骨架 | 未开始 |  |  | 对应 day13 |
 | 14 | FastAPI 与 SSE | 未开始 |  |  | 对应 day14 |
@@ -88,6 +88,8 @@
 - 2026-11-17 第 9 节教程已交付并完成教程隔离验证：MongoDB 使用用户部署在虚拟机的带账号密码服务（地址、容器与连接要点见 [第 9 节备课记录](day09-preparation.md)，密码只在用户本地 `.env`）。教程第一版使用本地 Docker 起 MongoDB 且存在多处错误，已按真实仓库和参考笔记整体重写；参考代码的几处缺陷与取舍记在备课记录。教程代码在隔离副本中编译、导入和 23 项检查通过，其中名称检索评分与三个分支用真实 BGE-M3 和 Milvus 只读验证；以上是教程交付时的状态；用户手敲后的正式验收见 [第 9 节验收记录](day09-acceptance.md)。
 - 2026-11-17 第 10 节教程已交付：`docs/study/day10-向量库检索.md`。物理目录错位（day10 视频是第 9 节，向量搜索在 day11 视频 02 至 06）；范围为 `node_search_embedding`、`create_hybrid_search_requests` 增加 `expr`，并按 day11 笔记回改第 9 节产品确认第 6 步（高于 0.85 全部确认，用户需在手敲时改动自己的第 6 步）。教程代码在隔离副本里用真实 BGE-M3、Milvus、文本模型和 MongoDB 临时库验证，细节见 [备课记录](day10-preparation.md)；用户代码尚未验收。
 - 2026-11-17 第 10 节用户代码验收通过：真实源码复制到 `workspace/verification/day10/formal-acceptance-20261117/project/`，过滤检索（命中 5 条、不存在商品 0 条）、边界探针、第 6 步新规则、主图和破坏性实验均通过，没有必须修改项；仅有一条不影响行为的可选建议。用户提交前把 `process()` 的占位注释改成了 docstring（验收时的可选建议），编译通过，其余与验收版本一致；代码提交 `0bb821b`，教程与验收文档提交 `6b157d8`。第 9 节教程第 6 步与现在的代码在“只选一个”处有历史差异，以本节教程为准。
+- 2026-11-17 第 11 节教程已交付：`docs/study/day11-HyDE与网络搜索.md`。范围为 `node_search_embedding_hyde`、`node_web_search_mcp` 和新配置 `core/tavily_config.py`；视频 07（导入全流程测试）经用户确认不并入本节。联网搜索按用户要求改用 Tavily 远程 MCP（官方 `mcp` 包，`uv add mcp`），运行期故障两路都降级为空列表。教程代码在隔离副本中用真实文本模型、BGE-M3、Milvus、Tavily 和 MongoDB 临时库验证，细节见 [备课记录](day11-preparation.md)；用户代码尚未验收。`.env.example` 里用户自己追加的 Tavily 两行尚未提交。
+- 2026-11-17 第 11 节用户代码验收通过：真实源码复制到 `workspace/verification/day11/formal-acceptance-20261117/project/`，用户日志与隔离探针均通过；首轮发现联网搜索节点导入被 IDE 自动补成 `workspace.verification...`（必须改）和 `snippet` 缺 `.strip()`（建议改），用户修订后复验通过，没有遗留项。代码和教程、验收文档尚未提交，提交基线待用户提交后补记；详见 [验收记录](day11-acceptance.md)。
 
 ## 欠账
 
