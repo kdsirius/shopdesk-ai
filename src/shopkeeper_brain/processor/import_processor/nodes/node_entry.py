@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
-from shopkeeper_brain.processor.import_process.exceptions import StateFieldError, ValidationError
-from shopkeeper_brain.processor.import_process.state import ImportGraphState
+from shopkeeper_brain.processor.import_processor.BaseNode import BaseNode
+from shopkeeper_brain.processor.import_processor.exceptions import StateFieldError, ValidationError
+from shopkeeper_brain.processor.import_processor.state import ImportGraphState
 
 
 class NodeEntry(BaseNode):

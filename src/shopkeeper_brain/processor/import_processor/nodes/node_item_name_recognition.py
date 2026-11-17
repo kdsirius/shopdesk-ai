@@ -8,10 +8,10 @@ from pymilvus import MilvusClient, DataType
 
 from shopkeeper_brain.core.llm_config import load_llm_config
 from shopkeeper_brain.core.milvus_config import load_milvus_config
-from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
-from shopkeeper_brain.processor.import_process.exceptions import StateFieldError, ConfigurationError, ValidationError, \
+from shopkeeper_brain.processor.import_processor.BaseNode import BaseNode
+from shopkeeper_brain.processor.import_processor.exceptions import StateFieldError, ConfigurationError, ValidationError, \
     ImportProcessError, MilvusError
-from shopkeeper_brain.processor.import_process.state import ImportGraphState, create_default_state
+from shopkeeper_brain.processor.import_processor.state import ImportGraphState, create_default_state
 from shopkeeper_brain.utils.embedding_utils import generate_embeddings
 from shopkeeper_brain.utils.milvus_utils import (
     escape_milvus_string,

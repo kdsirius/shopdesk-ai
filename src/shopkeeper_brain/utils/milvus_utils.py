@@ -2,10 +2,10 @@ import math
 
 from numbers import Real
 
-from pymilvus import MilvusClient
+from pymilvus import MilvusClient, AnnSearchRequest, WeightedRanker
 
 from shopkeeper_brain.core.milvus_config import load_milvus_config
-from shopkeeper_brain.processor.import_process.exceptions import ConfigurationError, ValidationError
+from shopkeeper_brain.processor.import_processor.exceptions import ConfigurationError, ValidationError
 
 _milvus_client: MilvusClient | None = None
 
@@ -57,3 +57,46 @@ def restore_sparse_vector(value: object, field_name: str) -> dict[int, float]:
         restored[index] = weight
 
     return restored
+
+
+def create_hybrid_search_requests(
+        dense_vector: list[float],
+        sparse_vector: dict[int, float],
+        limit: int = 5,
+) -> list[AnnSearchRequest]:
+    """为同一段文本构造 Dense 与 Sparse 两路检索请求，度量方式与入库时的索引一致。"""
+    dense_req = AnnSearchRequest(
+        data=[dense_vector],
+        anns_field="dense_vector",
+        param={"metric_type": "COSINE"},
+        limit=limit
+    )
+
+    sparse_req = AnnSearchRequest(
+        data=[sparse_vector],
+        anns_field="sparse_vector",
+        param={"metric_type": "IP"},
+        limit=limit
+    )
+
+    return [dense_req, sparse_req]
+
+
+def hybrid_search(
+        client: MilvusClient,
+        collection_name: str,
+        reqs: list[AnnSearchRequest],
+        ranker_weights: tuple[float, float] = (0.5, 0.5),
+        norm_score: bool = False,
+        limit: int = 5,
+        output_fields: list[str] | None = None,
+) -> list[list[dict]]:
+    """两路结果按权重融合排序；每个查询返回一个按评分从高到低排列的候选列表。"""
+    ranker = WeightedRanker(*ranker_weights, norm_score=norm_score)
+    return client.hybrid_search(
+        collection_name=collection_name,
+        reqs=reqs,
+        ranker=ranker,
+        limit=limit,
+        output_fields=output_fields
+    )

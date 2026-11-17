@@ -6,9 +6,9 @@ from typing import Any
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
-from shopkeeper_brain.processor.import_process.exceptions import StateFieldError
-from shopkeeper_brain.processor.import_process.state import ImportGraphState, create_default_state
+from shopkeeper_brain.processor.import_processor.BaseNode import BaseNode
+from shopkeeper_brain.processor.import_processor.exceptions import StateFieldError
+from shopkeeper_brain.processor.import_processor.state import ImportGraphState, create_default_state
 
 Chunk = dict[str, Any]
 

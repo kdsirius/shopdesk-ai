@@ -14,13 +14,13 @@ from minio.deleteobjects import DeleteObject
 
 from shopkeeper_brain.core.image_config import load_image_config
 from shopkeeper_brain.core.minio_config import load_minio_config
-from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
-from shopkeeper_brain.processor.import_process.exceptions import (
+from shopkeeper_brain.processor.import_processor.BaseNode import BaseNode
+from shopkeeper_brain.processor.import_processor.exceptions import (
     ConfigurationError,
     FileProcessingError,
     StateFieldError,
 )
-from shopkeeper_brain.processor.import_process.state import (
+from shopkeeper_brain.processor.import_processor.state import (
     ImportGraphState, create_default_state,
 )
 

@@ -1,6 +1,6 @@
 from langgraph.constants import END
 
-from shopkeeper_brain.processor.import_process.state import ImportGraphState
+from shopkeeper_brain.processor.import_processor.state import ImportGraphState
 
 
 def route_after_entry(state: ImportGraphState) -> str:

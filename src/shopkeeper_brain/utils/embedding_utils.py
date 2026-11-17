@@ -1,7 +1,7 @@
 from pymilvus.model.hybrid import BGEM3EmbeddingFunction
 
 from shopkeeper_brain.core.embedding_config import load_embedding_config
-from shopkeeper_brain.processor.import_process.exceptions import ConfigurationError
+from shopkeeper_brain.processor.import_processor.exceptions import ConfigurationError
 
 _bge_m3_ef: BGEM3EmbeddingFunction | None = None
 

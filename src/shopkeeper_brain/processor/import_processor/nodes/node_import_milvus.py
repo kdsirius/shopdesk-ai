@@ -6,11 +6,11 @@ from pathlib import Path
 from pymilvus import MilvusClient, DataType
 
 from shopkeeper_brain.core.milvus_config import MilvusConfig, load_milvus_config
-from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
-from shopkeeper_brain.processor.import_process.exceptions import StateFieldError, ValidationError, ConfigurationError, \
+from shopkeeper_brain.processor.import_processor.BaseNode import BaseNode
+from shopkeeper_brain.processor.import_processor.exceptions import StateFieldError, ValidationError, ConfigurationError, \
     ImportProcessError, MilvusError
-from shopkeeper_brain.processor.import_process.nodes.node_item_name_recognition import NodeItemNameRecognition
-from shopkeeper_brain.processor.import_process.state import ImportGraphState
+from shopkeeper_brain.processor.import_processor.nodes.node_item_name_recognition import NodeItemNameRecognition
+from shopkeeper_brain.processor.import_processor.state import ImportGraphState
 from shopkeeper_brain.utils.milvus_utils import restore_sparse_vector, get_milvus_client, escape_milvus_string
 
 DENSE_VECTOR_DIM = 1024

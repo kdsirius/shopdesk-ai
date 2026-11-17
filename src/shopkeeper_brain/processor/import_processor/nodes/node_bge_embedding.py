@@ -4,9 +4,9 @@ import math
 from copy import deepcopy
 from pathlib import Path
 
-from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
-from shopkeeper_brain.processor.import_process.exceptions import StateFieldError
-from shopkeeper_brain.processor.import_process.state import ImportGraphState, create_default_state
+from shopkeeper_brain.processor.import_processor.BaseNode import BaseNode
+from shopkeeper_brain.processor.import_processor.exceptions import StateFieldError
+from shopkeeper_brain.processor.import_processor.state import ImportGraphState, create_default_state
 
 from shopkeeper_brain.utils.embedding_utils import generate_embeddings
 
@@ -68,7 +68,7 @@ class NodeBGEEmbedding(BaseNode):
 
 
 if __name__ == '__main__':
-    from shopkeeper_brain.processor.import_process.nodes.node_item_name_recognition import (
+    from shopkeeper_brain.processor.import_processor.nodes.node_item_name_recognition import (
         NodeItemNameRecognition,
     )
 

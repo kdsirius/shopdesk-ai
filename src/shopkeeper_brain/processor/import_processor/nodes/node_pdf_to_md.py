@@ -7,14 +7,14 @@ from pathlib import Path
 import requests
 
 from shopkeeper_brain.core.mineru_config import load_mineru_config
-from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
-from shopkeeper_brain.processor.import_process.exceptions import (
+from shopkeeper_brain.processor.import_processor.BaseNode import BaseNode
+from shopkeeper_brain.processor.import_processor.exceptions import (
     ConfigurationError,
     FileProcessingError,
     PdfConversionError,
     StateFieldError,
 )
-from shopkeeper_brain.processor.import_process.state import (
+from shopkeeper_brain.processor.import_processor.state import (
     ImportGraphState,
     create_default_state,
 )
