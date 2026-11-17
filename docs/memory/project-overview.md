@@ -67,8 +67,8 @@ flowchart LR
 | 位置 | 当前职责 |
 | --- | --- |
 | [core/](../../src/shopkeeper_brain/core/) | MinerU、图片/MinIO、文本模型、本地 Embedding 和 Milvus 配置 |
-| [processor/import_process/](../../src/shopkeeper_brain/processor/import_process/) | BaseNode、异常（含 MilvusError）、状态和入口路由函数 |
-| [nodes/](../../src/shopkeeper_brain/processor/import_process/nodes/) | 入口、PDF 转换、图片处理、切片、主体识别及名称保存、BGE 向量化、Chunk 入库节点 |
+| [processor/import_process/](../../src/shopkeeper_brain/processor/import_processor/) | BaseNode、异常（含 MilvusError）、状态和入口路由函数 |
+| [nodes/](../../src/shopkeeper_brain/processor/import_processor/nodes/) | 入口、PDF 转换、图片处理、切片、主体识别及名称保存、BGE 向量化、Chunk 入库节点 |
 | [utils/](../../src/shopkeeper_brain/utils/) | BGE-M3 模型复用与向量转换；Milvus 客户端复用、过滤转义和 JSON Sparse 键恢复 |
 
 参考项目的 `api → services → processor` 分层及共享 `schema/core/utils` 是后续对照依据；当前并没有据此创建所有 API、服务、查询流程或前端目录。新增模块的路径和职责仍以实际源码及已确认教程为准。

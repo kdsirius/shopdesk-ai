@@ -25,7 +25,7 @@ flowchart LR
 
 - 第 4 节已经通过，手里有真实的 Markdown `_new.md`；
 - `state` 已经有 `md_path`、`md_content` 和 `file_title`；
-- [NodeMdImg](../../src/shopkeeper_brain/processor/import_process/nodes/node_md_img.py) 的图片处理链路已经验收，不需要在本节重新运行；
+- [NodeMdImg](../../src/shopkeeper_brain/processor/import_processor/nodes/node_md_img.py) 的图片处理链路已经验收，不需要在本节重新运行；
 - 用户使用 Python 3.11 或更高版本，并通过 uv 管理依赖。
 
 本节节点的输入和输出如下：
@@ -116,9 +116,9 @@ Markdown 里的代码示例可能包含这样的 Python 注释：
 
 当前学习项目已经有：
 
-- [ImportGraphState](../../src/shopkeeper_brain/processor/import_process/state.py)中的 `md_path`、`md_content` 和 `file_title`；
-- [BaseNode](../../src/shopkeeper_brain/processor/import_process/BaseNode.py)提供的节点调用外壳；
-- 第 4 节的 [NodeMdImg](../../src/shopkeeper_brain/processor/import_process/nodes/node_md_img.py)；
+- [ImportGraphState](../../src/shopkeeper_brain/processor/import_processor/state.py)中的 `md_path`、`md_content` 和 `file_title`；
+- [BaseNode](../../src/shopkeeper_brain/processor/import_processor/BaseNode.py)提供的节点调用外壳；
+- 第 4 节的 [NodeMdImg](../../src/shopkeeper_brain/processor/import_processor/nodes/node_md_img.py)；
 - 第 4 节真实生成的 `_new.md`。
 
 当前还没有：
@@ -268,7 +268,7 @@ def create_default_state(**overrides: Unpack[ImportGraphState]) -> ImportGraphSt
 改完先检查两份默认状态的列表是否独立：
 
 ```python
-from shopkeeper_brain.processor.import_process.state import create_default_state
+from shopkeeper_brain.processor.import_processor.state import create_default_state
 
 first = create_default_state()
 second = create_default_state()
@@ -370,13 +370,12 @@ from typing import Any
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
-from shopkeeper_brain.processor.import_process.exceptions import StateFieldError
-from shopkeeper_brain.processor.import_process.state import (
+from shopkeeper_brain.processor.import_processor.BaseNode import BaseNode
+from shopkeeper_brain.processor.import_processor.exceptions import StateFieldError
+from shopkeeper_brain.processor.import_processor.state import (
     ImportGraphState,
     create_default_state,
 )
-
 
 Chunk = dict[str, Any]
 
@@ -764,7 +763,7 @@ uv run python -c "from shopkeeper_brain.processor.import_process.nodes.node_docu
 先确认第 4 节的 `_new.md`路径在你的电脑上真实存在，再运行节点文件：
 
 ```bash
-uv run python src/shopkeeper_brain/processor/import_process/nodes/node_document_split.py
+uv run python src/shopkeeper_brain/processor/import_processor/nodes/node_document_split.py
 ```
 
 预期效果：

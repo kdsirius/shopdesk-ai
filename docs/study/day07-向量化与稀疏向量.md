@@ -190,8 +190,7 @@ def load_embedding_config() -> EmbeddingConfig:
 from pymilvus.model.hybrid import BGEM3EmbeddingFunction
 
 from shopkeeper_brain.core.embedding_config import load_embedding_config
-from shopkeeper_brain.processor.import_process.exceptions import ConfigurationError
-
+from shopkeeper_brain.processor.import_processor.exceptions import ConfigurationError
 
 _bge_m3_ef = None
 
@@ -264,7 +263,7 @@ def generate_embeddings(texts: list[str]) -> dict[str, list]:
 
 ### 4. 状态增加主体向量，识别节点只补第 5 步
 
-先打开已有 [state.py](../../src/shopkeeper_brain/processor/import_process/state.py)，在 `ImportGraphState` 的 `item_name: str` 后增加下面两行。这是**类型声明增量**，不覆盖整个文件：
+先打开已有 [state.py](../../src/shopkeeper_brain/processor/import_processor/state.py)，在 `ImportGraphState` 的 `item_name: str` 后增加下面两行。这是**类型声明增量**，不覆盖整个文件：
 
 ```python
     item_name_dense_vector: list[float]
@@ -280,7 +279,7 @@ def generate_embeddings(texts: list[str]) -> dict[str, list]:
 
 沿用原来的 `deepcopy()`，不同状态的空列表和字典仍然独立。没有生成主体向量时默认容器为空；生成成功后才写入实际数据。字段名带上 `item_name_`，避免与 Chunk 的正文向量混淆。
 
-然后打开已有 [node_item_name_recognition.py](../../src/shopkeeper_brain/processor/import_process/nodes/node_item_name_recognition.py)，在导入区增加下面这一行：
+然后打开已有 [node_item_name_recognition.py](../../src/shopkeeper_brain/processor/import_processor/nodes/node_item_name_recognition.py)，在导入区增加下面这一行：
 
 ```python
 from shopkeeper_brain.utils.embedding_utils import generate_embeddings
@@ -325,14 +324,13 @@ import math
 from copy import deepcopy
 from pathlib import Path
 
-from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
-from shopkeeper_brain.processor.import_process.exceptions import StateFieldError
-from shopkeeper_brain.processor.import_process.state import (
+from shopkeeper_brain.processor.import_processor.BaseNode import BaseNode
+from shopkeeper_brain.processor.import_processor.exceptions import StateFieldError
+from shopkeeper_brain.processor.import_processor.state import (
     ImportGraphState,
     create_default_state,
 )
 from shopkeeper_brain.utils.embedding_utils import generate_embeddings
-
 
 EMBEDDING_BATCH_SIZE = 3
 
@@ -415,7 +413,7 @@ class NodeBGEEmbedding(BaseNode):
 
 
 if __name__ == "__main__":
-    from shopkeeper_brain.processor.import_process.nodes.node_item_name_recognition import (
+    from shopkeeper_brain.processor.import_processor.nodes.node_item_name_recognition import (
         NodeItemNameRecognition,
     )
 

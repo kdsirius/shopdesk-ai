@@ -90,7 +90,7 @@ flowchart LR
 
 | 文件 | 你要做的事 |
 | --- | --- |
-| [state.py](../../src/shopkeeper_brain/processor/import_process/state.py) | 核对 `item_name` 类型与默认值 |
+| [state.py](../../src/shopkeeper_brain/processor/import_processor/state.py) | 核对 `item_name` 类型与默认值 |
 | [.env.example](../../.env.example) | 追加文本模型配置模板 |
 | `src/shopkeeper_brain/core/llm_config.py` | 新建文本模型配置读取模块 |
 | `src/shopkeeper_brain/processor/import_process/nodes/node_item_name_recognition.py` | 新建主体识别节点与学习期入口 |
@@ -223,13 +223,12 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 
 from shopkeeper_brain.core.llm_config import load_llm_config
-from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
-from shopkeeper_brain.processor.import_process.exceptions import StateFieldError
-from shopkeeper_brain.processor.import_process.state import (
+from shopkeeper_brain.processor.import_processor.BaseNode import BaseNode
+from shopkeeper_brain.processor.import_processor.exceptions import StateFieldError
+from shopkeeper_brain.processor.import_processor.state import (
     ImportGraphState,
     create_default_state,
 )
-
 
 ITEM_NAME_CHUNK_K = 3
 ITEM_NAME_CONTEXT_MAX_CHARS = 2500

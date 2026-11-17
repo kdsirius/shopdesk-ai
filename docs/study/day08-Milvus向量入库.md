@@ -288,7 +288,7 @@ from numbers import Real
 from pymilvus import MilvusClient
 
 from shopkeeper_brain.core.milvus_config import load_milvus_config
-from shopkeeper_brain.processor.import_process.exceptions import (
+from shopkeeper_brain.processor.import_processor.exceptions import (
     ConfigurationError,
     ValidationError,
 )
@@ -383,15 +383,15 @@ from pymilvus.client.field_data_extractors import dense_vector_width
 
 from shopkeeper_brain.core.llm_config import load_llm_config
 from shopkeeper_brain.core.milvus_config import load_milvus_config
-from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
-from shopkeeper_brain.processor.import_process.exceptions import (
+from shopkeeper_brain.processor.import_processor.BaseNode import BaseNode
+from shopkeeper_brain.processor.import_processor.exceptions import (
     ConfigurationError,
     ImportProcessError,
     MilvusError,
     StateFieldError,
     ValidationError,
 )
-from shopkeeper_brain.processor.import_process.state import (
+from shopkeeper_brain.processor.import_processor.state import (
     ImportGraphState,
     create_default_state,
 )
@@ -591,18 +591,18 @@ from pathlib import Path
 from pymilvus import DataType
 
 from shopkeeper_brain.core.milvus_config import MilvusConfig, load_milvus_config
-from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
-from shopkeeper_brain.processor.import_process.exceptions import (
+from shopkeeper_brain.processor.import_processor.BaseNode import BaseNode
+from shopkeeper_brain.processor.import_processor.exceptions import (
     ConfigurationError,
     ImportProcessError,
     MilvusError,
     StateFieldError,
     ValidationError,
 )
-from shopkeeper_brain.processor.import_process.nodes.node_item_name_recognition import (
+from shopkeeper_brain.processor.import_processor.nodes.node_item_name_recognition import (
     NodeItemNameRecognition,
 )
-from shopkeeper_brain.processor.import_process.state import ImportGraphState
+from shopkeeper_brain.processor.import_processor.state import ImportGraphState
 from shopkeeper_brain.utils.milvus_utils import (
     escape_milvus_string,
     get_milvus_client,
@@ -630,8 +630,8 @@ class NodeImportMilvus(BaseNode):
         return state
 
     def _step_1_validate_input(
-        self,
-        state: ImportGraphState,
+            self,
+            state: ImportGraphState,
     ) -> tuple[str, list[dict[str, object]]]:
         """校验全部 Chunk，并创建不会污染原状态的待插入副本。"""
         file_title = state.get("file_title")
@@ -693,14 +693,14 @@ class NodeImportMilvus(BaseNode):
 
             dense_vector = chunk.get("dense_vector")
             if (
-                not isinstance(dense_vector, list)
-                or len(dense_vector) != DENSE_VECTOR_DIM
-                or any(
-                    isinstance(value, bool)
-                    or not isinstance(value, (int, float))
-                    or not math.isfinite(float(value))
-                    for value in dense_vector
-                )
+                    not isinstance(dense_vector, list)
+                    or len(dense_vector) != DENSE_VECTOR_DIM
+                    or any(
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not math.isfinite(float(value))
+                for value in dense_vector
+            )
             ):
                 raise ValidationError(
                     message=(
@@ -725,8 +725,8 @@ class NodeImportMilvus(BaseNode):
         return file_title, normalized_chunks
 
     def _step_2_prepare_collection(
-        self,
-        config: MilvusConfig,
+            self,
+            config: MilvusConfig,
     ):
         """连接 Milvus，并在缺少 Chunk 集合时创建它。"""
         if not config.chunk_collection:
@@ -826,10 +826,10 @@ class NodeImportMilvus(BaseNode):
         )
 
     def _step_3_clean_old_data(
-        self,
-        client,
-        config: MilvusConfig,
-        file_title: str,
+            self,
+            client,
+            config: MilvusConfig,
+            file_title: str,
     ) -> None:
         """只删除当前文档的旧 Chunk，保留其他文档。"""
         safe_file_title = escape_milvus_string(file_title)
@@ -846,10 +846,10 @@ class NodeImportMilvus(BaseNode):
             ) from exc
 
     def _step_4_insert_data(
-        self,
-        client,
-        config: MilvusConfig,
-        chunks: list[dict[str, object]],
+            self,
+            client,
+            config: MilvusConfig,
+            chunks: list[dict[str, object]],
     ) -> list[dict[str, object]]:
         """映射 Schema、批量插入，并按返回顺序回填自增主键。"""
         data_to_insert = [
@@ -880,8 +880,8 @@ class NodeImportMilvus(BaseNode):
 
         inserted_ids = result.get("ids", [])
         if (
-            result.get("insert_count") != len(chunks)
-            or len(inserted_ids) != len(chunks)
+                result.get("insert_count") != len(chunks)
+                or len(inserted_ids) != len(chunks)
         ):
             raise MilvusError(
                 message=(

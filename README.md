@@ -8,7 +8,7 @@
 
 学习代码位于 [src/shopkeeper_brain](src/shopkeeper_brain/)，包括入口路由、PDF 转 Markdown、图片摘要与 MinIO 替换、文档切片、主体识别、BGE-M3 名称和切片双向量化，以及 Milvus 主体名称与 Chunk 入库。真实验证的范围与限制见各节验收记录，最近的记录为 [第 8 节验收](docs/memory/day08-acceptance.md)。
 
-当前主要通过各节点文件中的学习期 `__main__` 在 IDE 中运行。最近的真实入库入口为 [node_import_milvus.py](src/shopkeeper_brain/processor/import_process/nodes/node_import_milvus.py)，先保存主体名称，再批量保存 Chunk 并回填主键。[main_graph.py](src/shopkeeper_brain/processor/import_process/main_graph.py) 仍只提供入口后的路由函数；声明的命令行入口仍是脚手架问候，正式导入主图、HTTP 服务、检索与前端按学习进度逐节接入。
+当前主要通过各节点文件中的学习期 `__main__` 在 IDE 中运行。最近的真实入库入口为 [node_import_milvus.py](src/shopkeeper_brain/processor/import_processor/nodes/node_import_milvus.py)，先保存主体名称，再批量保存 Chunk 并回填主键。[main_graph.py](src/shopkeeper_brain/processor/import_processor/main_graph.py) 仍只提供入口后的路由函数；声明的命令行入口仍是脚手架问候，正式导入主图、HTTP 服务、检索与前端按学习进度逐节接入。
 
 ## 环境准备
 

@@ -325,14 +325,14 @@ from pathlib import Path
 import requests
 
 from shopkeeper_brain.core.mineru_config import load_mineru_config
-from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
-from shopkeeper_brain.processor.import_process.exceptions import (
+from shopkeeper_brain.processor.import_processor.BaseNode import BaseNode
+from shopkeeper_brain.processor.import_processor.exceptions import (
     ConfigurationError,
     FileProcessingError,
     PdfConversionError,
     StateFieldError,
 )
-from shopkeeper_brain.processor.import_process.state import (
+from shopkeeper_brain.processor.import_processor.state import (
     ImportGraphState,
     create_default_state,
 )
@@ -394,8 +394,8 @@ class NodePDFToMD(BaseNode):
         """申请上传地址、上传 PDF，并轮询到 MinerU 返回 ZIP 地址。"""
         config = load_mineru_config()
         for field_name, value in (
-            ("SHOPKEEPER_BRAIN_MINERU_BASE_URL", config.base_url),
-            ("SHOPKEEPER_BRAIN_MINERU_API_TOKEN", config.api_token),
+                ("SHOPKEEPER_BRAIN_MINERU_BASE_URL", config.base_url),
+                ("SHOPKEEPER_BRAIN_MINERU_API_TOKEN", config.api_token),
         ):
             if not value:
                 raise ConfigurationError(
@@ -493,9 +493,9 @@ class NodePDFToMD(BaseNode):
         run_dir = Path(tempfile.mkdtemp(prefix=f"{pdf_stem}_", dir=output_dir))
         zip_path = run_dir / "result.zip"
         with requests.get(
-            zip_url,
-            stream=True,
-            timeout=(10, 120),
+                zip_url,
+                stream=True,
+                timeout=(10, 120),
         ) as response:
             response.raise_for_status()
             with zip_path.open("wb") as target:

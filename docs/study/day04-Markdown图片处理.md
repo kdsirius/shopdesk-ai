@@ -27,8 +27,8 @@ flowchart LR
 本节的前置条件是：
 
 - 第 3 节已经通过，项目能读到真实 Markdown 和图片资源；
-- [状态定义](../../src/shopkeeper_brain/processor/import_process/state.py)中已有 `md_path`、`md_content`；
-- [PDF 节点](../../src/shopkeeper_brain/processor/import_process/nodes/node_pdf_to_md.py)能把真实 Markdown 写到 `workspace/`；
+- [状态定义](../../src/shopkeeper_brain/processor/import_processor/state.py)中已有 `md_path`、`md_content`；
+- [PDF 节点](../../src/shopkeeper_brain/processor/import_processor/nodes/node_pdf_to_md.py)能把真实 Markdown 写到 `workspace/`；
 - 你有权使用的 VL 模型配置和 MinIO 服务只在本地 `.env` 中准备，密钥不写入教程和 Git。
 
 本节节点的契约如下：
@@ -333,17 +333,16 @@ from minio.models import DeleteRequest
 
 from shopkeeper_brain.core.image_config import load_image_config
 from shopkeeper_brain.core.minio_config import load_minio_config
-from shopkeeper_brain.processor.import_process.BaseNode import BaseNode
-from shopkeeper_brain.processor.import_process.exceptions import (
+from shopkeeper_brain.processor.import_processor.BaseNode import BaseNode
+from shopkeeper_brain.processor.import_processor.exceptions import (
     ConfigurationError,
     FileProcessingError,
     StateFieldError,
 )
-from shopkeeper_brain.processor.import_process.state import (
+from shopkeeper_brain.processor.import_processor.state import (
     ImportGraphState,
     create_default_state,
 )
-
 
 ImageTarget = tuple[str, Path, tuple[str, str]]
 ImageInfo = dict[str, tuple[str, str]]
@@ -520,7 +519,7 @@ class NodeMdImg(BaseNode):
 
         if len(request_times) >= max_requests:
             sleep_seconds = window_seconds - (
-                current_time - request_times[0]
+                    current_time - request_times[0]
             )
             if sleep_seconds > 0:
                 self.logger.info(
@@ -623,10 +622,10 @@ class NodeMdImg(BaseNode):
         """清理旧对象、上传图片，并替换 Markdown 中的图片标签。"""
         config = load_minio_config()
         for field_name, value in (
-            ("SHOPKEEPER_BRAIN_MINIO_ENDPOINT", config.endpoint),
-            ("SHOPKEEPER_BRAIN_MINIO_ACCESS_KEY", config.access_key),
-            ("SHOPKEEPER_BRAIN_MINIO_SECRET_KEY", config.secret_key),
-            ("SHOPKEEPER_BRAIN_MINIO_BUCKET", config.bucket),
+                ("SHOPKEEPER_BRAIN_MINIO_ENDPOINT", config.endpoint),
+                ("SHOPKEEPER_BRAIN_MINIO_ACCESS_KEY", config.access_key),
+                ("SHOPKEEPER_BRAIN_MINIO_SECRET_KEY", config.secret_key),
+                ("SHOPKEEPER_BRAIN_MINIO_BUCKET", config.bucket),
         ):
             if not value:
                 raise ConfigurationError(
