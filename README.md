@@ -6,9 +6,9 @@
 
 ## 现有实现与运行入口
 
-学习代码位于 [src/shopkeeper_brain](src/shopkeeper_brain/)，包括入口路由、PDF 转 Markdown、图片摘要与 MinIO 替换、文档切片、主体识别、BGE-M3 名称和切片双向量化，Milvus 主体名称与 Chunk 入库，以及查询流程骨架、MongoDB 会话历史和产品名称确认。真实验证的范围与限制见各节验收记录，最近的记录为 [第 9 节验收](docs/memory/day09-acceptance.md)。
+学习代码位于 [src/shopkeeper_brain](src/shopkeeper_brain/)，包括入口路由、PDF 转 Markdown、图片摘要与 MinIO 替换、文档切片、主体识别、BGE-M3 名称和切片双向量化，Milvus 主体名称与 Chunk 入库，以及查询流程骨架、MongoDB 会话历史和产品名称确认。产品确认后的正文向量检索（`node_search_embedding`）。真实验证的范围与限制见各节验收记录，最近的记录为 [第 10 节验收](docs/memory/day10-acceptance.md)。
 
-当前主要通过各节点文件中的学习期 `__main__` 在 IDE 中运行。最近的真实入库入口为 [node_import_milvus.py](src/shopkeeper_brain/processor/import_processor/nodes/node_import_milvus.py)，先保存主体名称，再批量保存 Chunk 并回填主键。[main_graph.py](src/shopkeeper_brain/processor/import_processor/main_graph.py) 仍只提供入口后的路由函数；声明的命令行入口仍是脚手架问候，正式导入主图、HTTP 服务、检索与前端按学习进度逐节接入。查询流程在 [query_processor](src/shopkeeper_brain/processor/query_processor/)：主图已接好路由，只有产品确认节点（运行入口 [node_item_name_confirm.py](src/shopkeeper_brain/processor/query_processor/nodes/node_item_name_confirm.py)）有真实逻辑，其余检索、融合、重排和答案节点是占位。MongoDB 使用虚拟机服务，连接配置见 [.env.example](.env.example)，运行方法见 [第 9 节教程](docs/study/day09-检索流程骨架与产品确认.md)。
+当前主要通过各节点文件中的学习期 `__main__` 在 IDE 中运行。最近的真实入库入口为 [node_import_milvus.py](src/shopkeeper_brain/processor/import_processor/nodes/node_import_milvus.py)，先保存主体名称，再批量保存 Chunk 并回填主键。[main_graph.py](src/shopkeeper_brain/processor/import_processor/main_graph.py) 仍只提供入口后的路由函数；声明的命令行入口仍是脚手架问候，正式导入主图、HTTP 服务、检索与前端按学习进度逐节接入。查询流程在 [query_processor](src/shopkeeper_brain/processor/query_processor/)：主图已接好路由，只有产品确认节点（运行入口 [node_item_name_confirm.py](src/shopkeeper_brain/processor/query_processor/nodes/node_item_name_confirm.py)）和向量检索节点（运行入口 [node_search_embedding.py](src/shopkeeper_brain/processor/query_processor/nodes/node_search_embedding.py)）有真实逻辑，其余 HyDE、网络搜索、融合、重排和答案节点是占位。MongoDB 使用虚拟机服务，连接配置见 [.env.example](.env.example)，运行方法见 [第 9 节教程](docs/study/day09-检索流程骨架与产品确认.md)。
 
 ## 环境准备
 
@@ -49,4 +49,4 @@ BGE-M3 的实际路线是 CPU/FP32，模型准备和配置见 [第 7 节教程](
 
 稀疏向量在内存中使用整数特征编号，JSON 对象键会变成字符串；读取备份后需恢复整数键。Dense 为 1024 维并做 L2 归一化，Sparse 保留模型原权重，不能照搬 Dense 的单位范数要求。
 
-Milvus 两类数据的真实入库、索引、重复导入和主键回填已在第 8 节验收；第 9 节已验收产品名称确认（只查 `kb_item_names`）；正文检索、融合重排和 Web 交互等能力仍按学习进度推进，不能把入库或名称确认通过当作查询链路已经就绪。
+Milvus 两类数据的真实入库、索引、重复导入和主键回填已在第 8 节验收；第 9 节已验收产品名称确认（只查 `kb_item_names`），第 10 节已验收带商品过滤的正文向量检索（查 `kb_chunks`）；HyDE、网络搜索、融合重排和 Web 交互等能力仍按学习进度推进，不能把入库、名称确认或单路检索通过当作查询链路已经就绪。
