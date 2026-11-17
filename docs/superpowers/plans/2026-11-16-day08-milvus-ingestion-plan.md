@@ -25,14 +25,14 @@
 
 - Modify: `.env.example` — 增加无密钥的 Milvus URI 和两个集合名称模板。
 - Create: `src/shopkeeper_brain/core/milvus_config.py` — 读取 Milvus 连接和集合配置。
-- Modify: `src/shopkeeper_brain/processor/import_process/exceptions.py` — 增加 `MilvusError`，让数据库错误保留项目异常边界。
+- Modify: `src/shopkeeper_brain/processor/import_processor/exceptions.py` — 增加 `MilvusError`，让数据库错误保留项目异常边界。
 - Create: `src/shopkeeper_brain/utils/milvus_utils.py` — 复用 `MilvusClient`、转义过滤表达式、恢复 JSON Sparse 键。
-- Modify: `src/shopkeeper_brain/processor/import_process/nodes/node_item_name_recognition.py` — 在已有主体识别与名称向量步骤后增加主体名称集合保存步骤。
-- Create: `src/shopkeeper_brain/processor/import_process/nodes/node_import_milvus.py` — Chunk 输入校验、集合准备、幂等清理、批量插入、`chunk_id` 回填和学习期真实入口。
+- Modify: `src/shopkeeper_brain/processor/import_processor/nodes/node_item_name_recognition.py` — 在已有主体识别与名称向量步骤后增加主体名称集合保存步骤。
+- Create: `src/shopkeeper_brain/processor/import_processor/nodes/node_import_milvus.py` — Chunk 输入校验、集合准备、幂等清理、批量插入、`chunk_id` 回填和学习期真实入口。
 
 ### 不修改的范围
 
-- `src/shopkeeper_brain/processor/import_process/main_graph.py`：本节不接正式主图。
+- `src/shopkeeper_brain/processor/import_processor/main_graph.py`：本节不接正式主图。
 - `docs/study/day01` 至 `day07`：不回改前七节教程。
 - `reference/`：始终只读。
 - `workspace/day07-real-run/state_vector.json`：只读输入，不覆盖。
@@ -103,7 +103,7 @@ JSON 对象键在序列化后是字符串；入库前必须恢复为整数。Den
 **Files:**
 - Modify: `.env.example`
 - Create: `src/shopkeeper_brain/core/milvus_config.py`
-- Modify: `src/shopkeeper_brain/processor/import_process/exceptions.py`
+- Modify: `src/shopkeeper_brain/processor/import_processor/exceptions.py`
 - Create: `src/shopkeeper_brain/utils/milvus_utils.py`
 - Modify: `docs/study/day08-Milvus向量入库.md`
 
@@ -280,7 +280,7 @@ def restore_sparse_vector(value: object, field_name: str) -> dict[int, float]:
 
 
 **Files:**
-- Modify: `src/shopkeeper_brain/processor/import_process/nodes/node_item_name_recognition.py`
+- Modify: `src/shopkeeper_brain/processor/import_processor/nodes/node_item_name_recognition.py`
 - Modify: `docs/study/day08-Milvus向量入库.md`
 
 - [ ] **Step 1：在现有导入区增加本节必需依赖**
@@ -502,7 +502,7 @@ self._step_6_save_to_milvus(
 
 
 **Files:**
-- Create: `src/shopkeeper_brain/processor/import_process/nodes/node_import_milvus.py`
+- Create: `src/shopkeeper_brain/processor/import_processor/nodes/node_import_milvus.py`
 - Modify: `docs/study/day08-Milvus向量入库.md`
 
 - [ ] **Step 1：按完整文件方式交付 `node_import_milvus.py`**
@@ -510,7 +510,7 @@ self._step_6_save_to_milvus(
 教程中必须在代码块前紧邻写出：
 
 ```text
-**文件**：`src/shopkeeper_brain/processor/import_process/nodes/node_import_milvus.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/nodes/node_import_milvus.py`
 ```
 
 完整文件内容如下：
@@ -1052,7 +1052,7 @@ python -I -m compileall -q src
 再运行：
 
 ```bash
-uv run --project <副本绝对路径> python -I -c "from shopkeeper_brain.core.milvus_config import load_milvus_config; from shopkeeper_brain.utils.milvus_utils import restore_sparse_vector; from shopkeeper_brain.processor.import_process.nodes.node_import_milvus import NodeImportMilvus; print(type(restore_sparse_vector({'12': 0.5}, 'demo')).__name__); print(NodeImportMilvus.name)"
+uv run --project <副本绝对路径> python -I -c "from shopkeeper_brain.core.milvus_config import load_milvus_config; from shopkeeper_brain.utils.milvus_utils import restore_sparse_vector; from shopkeeper_brain.processor.import_processor.nodes.node_import_milvus import NodeImportMilvus; print(type(restore_sparse_vector({'12': 0.5}, 'demo')).__name__); print(NodeImportMilvus.name)"
 ```
 
 预期输出包含：
@@ -1118,7 +1118,7 @@ node_import_milvus
 对话中提供本节教程路径、需要用户手敲的文件列表和真实运行入口：
 
 ```text
-src/shopkeeper_brain/processor/import_process/nodes/node_import_milvus.py
+src/shopkeeper_brain/processor/import_processor/nodes/node_import_milvus.py
 ```
 
 用户完成手敲、自测并反馈后，才进入正式验收；当前会话不代写 `src/` 学习代码。
@@ -1133,9 +1133,9 @@ src/shopkeeper_brain/processor/import_process/nodes/node_import_milvus.py
 - Read: 用户真实修改后的 `.env.example`
 - Read: `src/shopkeeper_brain/core/milvus_config.py`
 - Read: `src/shopkeeper_brain/utils/milvus_utils.py`
-- Read: `src/shopkeeper_brain/processor/import_process/exceptions.py`
-- Read: `src/shopkeeper_brain/processor/import_process/nodes/node_item_name_recognition.py`
-- Read: `src/shopkeeper_brain/processor/import_process/nodes/node_import_milvus.py`
+- Read: `src/shopkeeper_brain/processor/import_processor/exceptions.py`
+- Read: `src/shopkeeper_brain/processor/import_processor/nodes/node_item_name_recognition.py`
+- Read: `src/shopkeeper_brain/processor/import_processor/nodes/node_import_milvus.py`
 - Read: `workspace/day07-real-run/state_vector.json`
 - Create: `workspace/verification/day08/formal-acceptance-<日期>/`
 - Create: `docs/memory/day08-acceptance.md`

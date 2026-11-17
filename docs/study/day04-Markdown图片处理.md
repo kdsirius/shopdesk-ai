@@ -314,7 +314,7 @@ def load_minio_config() -> MinioConfig:
 
 现在写节点。下面是一份完整文件，包含本地扫描、上下文提取、真实 VL 摘要、MinIO 上传、Markdown 替换、备份和学习期真实入口。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/nodes/node_md_img.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/nodes/node_md_img.py`
 
 ```python
 import base64

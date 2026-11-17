@@ -69,8 +69,8 @@ flowchart LR
 ## 文件边界
 
 - 教程新增：`docs/study/day06-主体识别.md`；
-- 用户手敲时修改：`src/shopkeeper_brain/processor/import_process/state.py`、`.env.example`；
-- 用户手敲时新增：`src/shopkeeper_brain/core/llm_config.py`、`src/shopkeeper_brain/processor/import_process/nodes/node_item_name_recognition.py`；
+- 用户手敲时修改：`src/shopkeeper_brain/processor/import_processor/state.py`、`.env.example`；
+- 用户手敲时新增：`src/shopkeeper_brain/core/llm_config.py`、`src/shopkeeper_brain/processor/import_processor/nodes/node_item_name_recognition.py`；
 - 本节不修改：`pyproject.toml`、`main_graph.py`、第 5 节切片节点；当前项目已经有 `langchain-openai`；
 - 后续验收记忆：用户代码验收通过后才新增 `docs/memory/day06-acceptance.md`，并更新 `docs/memory/learning-progress.md`；
 - 临时副本和输出：统一放在 `workspace/verification/day06/`；

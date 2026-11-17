@@ -315,7 +315,7 @@ from shopkeeper_brain.utils.embedding_utils import generate_embeddings
 
 本节每批先处理 3 个 Chunk，最后一批按实际剩余数量处理。参考笔记中的 5、当天代码中的 3 都是批次选择，不改变“一个输入对应一对输出”的契约。CPU 下先保持 3，正常流程跑通后再根据实际内存和耗时调整。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/nodes/node_bge_embedding.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/nodes/node_bge_embedding.py`
 
 ```python
 import json

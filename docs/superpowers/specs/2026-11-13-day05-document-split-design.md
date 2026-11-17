@@ -51,7 +51,7 @@ flowchart LR
 ## 文件边界
 
 - 教程新增：`docs/study/day05-文档切片.md`；
-- 用户手敲时修改：`pyproject.toml`、`src/shopkeeper_brain/processor/import_process/state.py`，新增 `src/shopkeeper_brain/processor/import_process/nodes/node_document_split.py`；
+- 用户手敲时修改：`pyproject.toml`、`src/shopkeeper_brain/processor/import_processor/state.py`，新增 `src/shopkeeper_brain/processor/import_processor/nodes/node_document_split.py`；
 - 后续验收记忆：用户代码验收通过后才新增 `docs/memory/day05-acceptance.md`，并更新 `docs/memory/learning-progress.md`；
 - 临时副本和输出：统一放在 `workspace/verification/day05/`；
 - `reference/` 始终只读。

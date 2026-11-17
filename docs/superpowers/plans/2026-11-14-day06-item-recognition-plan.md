@@ -20,8 +20,8 @@
 ## 文件边界
 
 - 新建教程：[docs/study/day06-主体识别.md](E:/dev/python/project-study/shopkeeper-brain/docs/study/day06-主体识别.md)，只保存业务、原理、手敲代码和真实验证。
-- 教程指导用户修改：[src/shopkeeper_brain/processor/import_process/state.py](E:/dev/python/project-study/shopkeeper-brain/src/shopkeeper_brain/processor/import_process/state.py)、`.env.example`。
-- 教程指导用户新增：`src/shopkeeper_brain/core/llm_config.py`、`src/shopkeeper_brain/processor/import_process/nodes/node_item_name_recognition.py`。
+- 教程指导用户修改：[src/shopkeeper_brain/processor/import_processor/state.py](E:/dev/python/project-study/shopkeeper-brain/src/shopkeeper_brain/processor/import_processor/state.py)、`.env.example`。
+- 教程指导用户新增：`src/shopkeeper_brain/core/llm_config.py`、`src/shopkeeper_brain/processor/import_processor/nodes/node_item_name_recognition.py`。
 - 不修改当前 `main_graph.py`，不重复第 5 节节点和备份逻辑，不新增自动化测试文件。
 - 后续验收才修改 `docs/memory/day06-acceptance.md`和进度文件。
 - 验收副本、输入复制品和日志统一放在 `workspace/verification/day06/`；不复制 `.env` 或 `__pycache__`。

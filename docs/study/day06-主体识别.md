@@ -93,7 +93,7 @@ flowchart LR
 | [state.py](../../src/shopkeeper_brain/processor/import_processor/state.py) | 核对 `item_name` 类型与默认值 |
 | [.env.example](../../.env.example) | 追加文本模型配置模板 |
 | `src/shopkeeper_brain/core/llm_config.py` | 新建文本模型配置读取模块 |
-| `src/shopkeeper_brain/processor/import_process/nodes/node_item_name_recognition.py` | 新建主体识别节点与学习期入口 |
+| `src/shopkeeper_brain/processor/import_processor/nodes/node_item_name_recognition.py` | 新建主体识别节点与学习期入口 |
 
 按状态、配置、节点的顺序手敲，使用方出现时，被引用的模块就已经存在。
 
@@ -101,7 +101,7 @@ flowchart LR
 
 节点识别结果要交给后续流程，因此 `ImportGraphState` 和 `GRAPH_DEFAULT_STATE` 都要有 `item_name`。你已经手敲了这两处，只需要核对下面的字段位置，不必重抄其他已有内容。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/state.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/state.py`
 
 ```python
 from copy import deepcopy
@@ -212,7 +212,7 @@ def load_llm_config() -> LLMConfig:
 
 文件末尾保留和第 3 节相同的学习期 `__main__`：改好真实文件路径，在 IDE 中直接运行。它只读取已有 JSON，输出观察信息，不覆盖上一节的产物。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/nodes/node_item_name_recognition.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/nodes/node_item_name_recognition.py`
 
 ```python
 import json
@@ -450,7 +450,7 @@ if __name__ == "__main__":
 
 ### 2. 在 IDE 中运行节点文件
 
-1. 打开 `src/shopkeeper_brain/processor/import_process/nodes/node_item_name_recognition.py`。
+1. 打开 `src/shopkeeper_brain/processor/import_processor/nodes/node_item_name_recognition.py`。
 2. 找到文件末尾的 `if __name__ == "__main__":`。
 3. 把 `chunks_path` 改成你实际保留的第 5 节 JSON 绝对路径。教程路径在当前工程已有真实产物；如果你保存位置不同，就只改这里。
 4. 在 `_step_3_call_llm()` 的 `response = model.invoke(...)` 和 `_step_4_update_chunks()` 处打断点，方便查看调用前后数据。

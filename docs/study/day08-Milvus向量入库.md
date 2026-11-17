@@ -195,10 +195,10 @@ Dense 用余弦相似度，是因为第 7 节的 Dense 已经按 `normalize_embe
 | --- | --- |
 | [.env.example](../../.env.example) | 追加 Milvus 配置模板 |
 | `src/shopkeeper_brain/core/milvus_config.py` | 新建 Milvus 配置读取模块 |
-| `src/shopkeeper_brain/processor/import_process/exceptions.py` | 追加 Milvus 异常类型 |
+| `src/shopkeeper_brain/processor/import_processor/exceptions.py` | 追加 Milvus 异常类型 |
 | `src/shopkeeper_brain/utils/milvus_utils.py` | 新建客户端、转义和 Sparse 恢复工具 |
-| `src/shopkeeper_brain/processor/import_process/nodes/node_item_name_recognition.py` | 追加主体名称保存步骤 |
-| `src/shopkeeper_brain/processor/import_process/nodes/node_import_milvus.py` | 新建 Chunk 入库节点和学习期入口 |
+| `src/shopkeeper_brain/processor/import_processor/nodes/node_item_name_recognition.py` | 追加主体名称保存步骤 |
+| `src/shopkeeper_brain/processor/import_processor/nodes/node_import_milvus.py` | 新建 Chunk 入库节点和学习期入口 |
 
 按“配置 → 异常 → 工具 → 被调用的主体步骤 → Chunk 节点”的顺序手敲。这样每个使用方出现时，被引用的文件已经存在。
 
@@ -264,7 +264,7 @@ def load_milvus_config() -> MilvusConfig:
 
 ### 4. 增加 Milvus 异常类型
 
-打开 `src/shopkeeper_brain/processor/import_process/exceptions.py`，在现有 `ConfigurationError` 类后追加下面的类。不要重抄其他已有异常，也不要修改它们的继承关系。
+打开 `src/shopkeeper_brain/processor/import_processor/exceptions.py`，在现有 `ConfigurationError` 类后追加下面的类。不要重抄其他已有异常，也不要修改它们的继承关系。
 
 ```python
 
@@ -373,7 +373,7 @@ def restore_sparse_vector(value: object, field_name: str) -> dict[int, float]:
 
 #### 6.1 增加导入
 
-打开 `src/shopkeeper_brain/processor/import_process/nodes/node_item_name_recognition.py`，将文件开头现有的导入区（从 `from langchain_core.messages` 到 `from shopkeeper_brain.utils.embedding_utils`）整体替换为下面代码；其他类、方法和学习期入口保持不变：
+打开 `src/shopkeeper_brain/processor/import_processor/nodes/node_item_name_recognition.py`，将文件开头现有的导入区（从 `from langchain_core.messages` 到 `from shopkeeper_brain.utils.embedding_utils`）整体替换为下面代码；其他类、方法和学习期入口保持不变：
 
 ```python
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -580,7 +580,7 @@ from shopkeeper_brain.utils.milvus_utils import (
 
 现在创建 Chunk 的独立节点。它不会重新生成任何向量，只把第 7 节状态中的已有字段映射到 Chunk 集合。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/nodes/node_import_milvus.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/nodes/node_import_milvus.py`
 
 ```python
 import json
@@ -1032,7 +1032,7 @@ python -I -m compileall -q src
 
 ### 3. 在 IDE 中运行第一次真实入库
 
-1. 打开 `src/shopkeeper_brain/processor/import_process/nodes/node_import_milvus.py`。
+1. 打开 `src/shopkeeper_brain/processor/import_processor/nodes/node_import_milvus.py`。
 2. 在 `_step_6_save_to_milvus()`、`_step_1_validate_input()`、`_step_4_insert_data()` 和末尾两个 `query()` 处设置断点。
 3. 选择当前项目 uv 解释器，直接 Run 或 Debug 这个文件；不要先运行正式主图，也不要执行参考项目代码。
 4. 第一个断点处检查：

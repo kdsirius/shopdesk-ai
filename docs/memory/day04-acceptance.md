@@ -1,7 +1,7 @@
 # 第 4 节验收记录：Markdown 图片处理
 
 - 验收日期：2026-11-13
-- 用户真实代码：`src/shopkeeper_brain/processor/import_process/nodes/node_md_img.py`
+- 用户真实代码：`src/shopkeeper_brain/processor/import_processor/nodes/node_md_img.py`
 - 第一轮隔离验收副本：`workspace/verification/day04/formal-acceptance-20261113/`
 - 第二轮隔离验收副本：`workspace/verification/day04/formal-acceptance-20261113-rerun/`
 - 破坏性实验副本：`workspace/verification/day04/formal-acceptance-20261113-destructive/` 和第二轮副本内的隔离实验

@@ -107,7 +107,7 @@ path.is_file()# True 或 False
 
 ```bash
 uv run python -m compileall -q src/shopkeeper_brain
-uv run python -c "from shopkeeper_brain.processor.import_process.state import create_default_state; print(create_default_state())"
+uv run python -c "from shopkeeper_brain.processor.import_processor.state import create_default_state; print(create_default_state())"
 ```
 
 **验证状态：未验证。**
@@ -142,7 +142,7 @@ uv run python -c "from shopkeeper_brain.processor.import_process.state import cr
 
 入口节点要写入三个新事实：PDF 路径、Markdown 路径和文件标题。两个路径都保留在状态里，是因为后续主图虽然只会选择一个分支，但每个分支节点需要从固定字段取值。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/state.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/state.py`
 
 ```python
 from copy import deepcopy
@@ -191,7 +191,7 @@ def create_default_state(**overrides: Unpack[ImportGraphState]) -> ImportGraphSt
 
 入口节点有两类输入错误：状态里没有有效路径，或者路径存在但扩展名不受支持。它们都属于导入流程异常，但调用方需要知道是哪一类。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/exceptions.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/exceptions.py`
 
 ```python
 class ImportProcessError(Exception):
@@ -243,13 +243,13 @@ class ValidationError(ImportProcessError):
 
 入口节点的处理顺序固定为：取值 → 类型校验 → 路径校验 → 清理旧分支 → 判断后缀 → 写入标题 → 返回状态。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/nodes/__init__.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/nodes/__init__.py`
 
 ```python
 """导入流程节点。"""
 ```
 
-**文件**：`src/shopkeeper_brain/processor/import_process/nodes/node_entry.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/nodes/node_entry.py`
 
 ```python
 from pathlib import Path
@@ -308,7 +308,7 @@ class NodeEntry(BaseNode):
 
 主图条件边需要一个只负责选择下一站的函数。当前后续节点还没有真实实现，所以本节先把路由契约落下来，不注册空的 PDF、图片、切片和入库节点。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/main_graph.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/main_graph.py`
 
 ```python
 from langgraph.constants import END
@@ -353,7 +353,7 @@ graph.add_conditional_edges(
 
 ```bash
 uv run python -m compileall -q src/shopkeeper_brain
-uv run python -c "from shopkeeper_brain.processor.import_process.nodes.node_entry import NodeEntry; from shopkeeper_brain.processor.import_process.main_graph import route_after_entry; print(NodeEntry.name, route_after_entry.__name__)"
+uv run python -c "from shopkeeper_brain.processor.import_processor.nodes.node_entry import NodeEntry; from shopkeeper_brain.processor.import_processor.main_graph import route_after_entry; print(NodeEntry.name, route_after_entry.__name__)"
 ```
 
 **验证状态：未验证。**
@@ -371,7 +371,7 @@ node_entry route_after_entry
 运行：
 
 ```bash
-uv run python -c "from shopkeeper_brain.processor.import_process.nodes.node_entry import NodeEntry; from shopkeeper_brain.processor.import_process.state import create_default_state; pdf='reference/掌教智库/2.资料/04-设备手册汇总/doc/hak180产品安全手册.pdf'; md='reference/掌教智库/4.视频/day02/课堂笔记/01【掌柜智库】项目简介.md'; node=NodeEntry(); pdf_state=node(create_default_state(import_file_path=pdf)); md_state=node(create_default_state(import_file_path=md)); assert pdf_state['is_pdf_read_enabled'] and not pdf_state['is_md_read_enabled']; assert pdf_state['pdf_path']==pdf and pdf_state['file_title']=='hak180产品安全手册'; assert md_state['is_md_read_enabled'] and not md_state['is_pdf_read_enabled']; assert md_state['md_path']==md and md_state['file_title']=='01【掌柜智库】项目简介'; print('PDF 和 Markdown 入口状态验证通过')"
+uv run python -c "from shopkeeper_brain.processor.import_processor.nodes.node_entry import NodeEntry; from shopkeeper_brain.processor.import_processor.state import create_default_state; pdf='reference/掌教智库/2.资料/04-设备手册汇总/doc/hak180产品安全手册.pdf'; md='reference/掌教智库/4.视频/day02/课堂笔记/01【掌柜智库】项目简介.md'; node=NodeEntry(); pdf_state=node(create_default_state(import_file_path=pdf)); md_state=node(create_default_state(import_file_path=md)); assert pdf_state['is_pdf_read_enabled'] and not pdf_state['is_md_read_enabled']; assert pdf_state['pdf_path']==pdf and pdf_state['file_title']=='hak180产品安全手册'; assert md_state['is_md_read_enabled'] and not md_state['is_pdf_read_enabled']; assert md_state['md_path']==md and md_state['file_title']=='01【掌柜智库】项目简介'; print('PDF 和 Markdown 入口状态验证通过')"
 ```
 
 **验证状态：未验证。**
@@ -389,7 +389,7 @@ PDF 和 Markdown 入口状态验证通过
 运行：
 
 ```bash
-uv run python -c "from shopkeeper_brain.processor.import_process.main_graph import route_after_entry; from shopkeeper_brain.processor.import_process.nodes.node_entry import NodeEntry; from shopkeeper_brain.processor.import_process.state import create_default_state; from langgraph.constants import END; node=NodeEntry(); pdf=node(create_default_state(import_file_path='reference/掌教智库/2.资料/04-设备手册汇总/doc/hak180产品安全手册.pdf')); md=node(create_default_state(import_file_path='reference/掌教智库/4.视频/day02/课堂笔记/01【掌柜智库】项目简介.md')); assert route_after_entry(pdf)=='node_pdf_to_md'; assert route_after_entry(md)=='node_md_img'; assert route_after_entry(create_default_state())==END; print('入口条件路由验证通过')"
+uv run python -c "from shopkeeper_brain.processor.import_processor.main_graph import route_after_entry; from shopkeeper_brain.processor.import_processor.nodes.node_entry import NodeEntry; from shopkeeper_brain.processor.import_processor.state import create_default_state; from langgraph.constants import END; node=NodeEntry(); pdf=node(create_default_state(import_file_path='reference/掌教智库/2.资料/04-设备手册汇总/doc/hak180产品安全手册.pdf')); md=node(create_default_state(import_file_path='reference/掌教智库/4.视频/day02/课堂笔记/01【掌柜智库】项目简介.md')); assert route_after_entry(pdf)=='node_pdf_to_md'; assert route_after_entry(md)=='node_md_img'; assert route_after_entry(create_default_state())==END; print('入口条件路由验证通过')"
 ```
 
 **验证状态：未验证。**
@@ -407,7 +407,7 @@ uv run python -c "from shopkeeper_brain.processor.import_process.main_graph impo
 运行：
 
 ```bash
-uv run python -c "from shopkeeper_brain.processor.import_process.nodes.node_entry import NodeEntry; from shopkeeper_brain.processor.import_process.state import create_default_state; from shopkeeper_brain.processor.import_process.exceptions import StateFieldError, ValidationError; node=NodeEntry(); unsupported=create_default_state(import_file_path='pyproject.toml'); missing=create_default_state(import_file_path='workspace/verification/day02/not-found.md');
+uv run python -c "from shopkeeper_brain.processor.import_processor.nodes.node_entry import NodeEntry; from shopkeeper_brain.processor.import_processor.state import create_default_state; from shopkeeper_brain.processor.import_processor.exceptions import StateFieldError, ValidationError; node=NodeEntry(); unsupported=create_default_state(import_file_path='pyproject.toml'); missing=create_default_state(import_file_path='workspace/verification/day02/not-found.md');
 try:
     node(unsupported)
 except ValidationError as exc:

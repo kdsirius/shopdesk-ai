@@ -159,7 +159,7 @@ build-backend = "uv_build"
 - `file_dir`：调用方指定的本次输出根目录；
 - `md_content`：从真实 Markdown 文件读取出的正文。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/state.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/state.py`
 
 ```python
 from copy import deepcopy
@@ -208,7 +208,7 @@ def create_default_state(**overrides: Unpack[ImportGraphState]) -> ImportGraphSt
 
 如果所有失败都变成普通 `Exception`，真实运行时只能看到“失败了”，不知道是缺 Token、PDF 不存在、MinerU 拒绝任务，还是 ZIP 缺少 `full.md`。沿用上一节的异常基类，只补本节需要的分类。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/exceptions.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/exceptions.py`
 
 ```python
 class ImportProcessError(Exception):
@@ -313,7 +313,7 @@ def load_mineru_config() -> MinerUConfig:
 
 现在才写使用方。先读 `process()`：它只做四件事——校验路径、完成 MinerU 流程、读取 Markdown、回写状态。真正的细节放到三个步骤方法里。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/nodes/node_pdf_to_md.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/nodes/node_pdf_to_md.py`
 
 ```python
 import logging
@@ -611,7 +611,7 @@ if __name__ == "__main__":
 
 ### 2. 在 IDE 中运行真实入口
 
-1. 打开 `src/shopkeeper_brain/processor/import_process/nodes/node_pdf_to_md.py`。
+1. 打开 `src/shopkeeper_brain/processor/import_processor/nodes/node_pdf_to_md.py`。
 2. 找到文件末尾的 `if __name__ == "__main__":`。
 3. 把 `pdf_path` 改成你电脑上真实存在的 PDF 绝对路径。
 4. 把 `output_dir` 改成项目 `workspace/` 下你准备好的输出目录。

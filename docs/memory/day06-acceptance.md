@@ -1,8 +1,8 @@
 # 第 6 节验收记录：主体识别
 
 - 验收日期：2026-11-15
-- 用户真实实现：`src/shopkeeper_brain/processor/import_process/nodes/node_item_name_recognition.py`
-- 配置与状态：`src/shopkeeper_brain/core/llm_config.py`、`src/shopkeeper_brain/processor/import_process/state.py`
+- 用户真实实现：`src/shopkeeper_brain/processor/import_processor/nodes/node_item_name_recognition.py`
+- 配置与状态：`src/shopkeeper_brain/core/llm_config.py`、`src/shopkeeper_brain/processor/import_processor/state.py`
 - 原始验收副本：`workspace/verification/day06/formal-acceptance-20261115/project/`
 - 第二轮副本：`workspace/verification/day06/formal-acceptance-20261115-rerun/project/`
 - 最终定向复验副本：`workspace/verification/day06/formal-acceptance-20261115-final/project/`

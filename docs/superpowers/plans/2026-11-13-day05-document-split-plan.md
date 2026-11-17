@@ -13,7 +13,7 @@
 ## 文件边界
 
 - 新建教程：[docs/study/day05-文档切片.md](E:/dev/python/project-study/shopkeeper-brain/docs/study/day05-文档切片.md)，只保存业务、原理、手敲代码和真实验证。
-- 教程指导用户修改：[pyproject.toml](E:/dev/python/project-study/shopkeeper-brain/pyproject.toml)、[src/shopkeeper_brain/processor/import_process/state.py](E:/dev/python/project-study/shopkeeper-brain/src/shopkeeper_brain/processor/import_process/state.py)，以及新增 `src/shopkeeper_brain/processor/import_process/nodes/node_document_split.py`。
+- 教程指导用户修改：[pyproject.toml](E:/dev/python/project-study/shopkeeper-brain/pyproject.toml)、[src/shopkeeper_brain/processor/import_processor/state.py](E:/dev/python/project-study/shopkeeper-brain/src/shopkeeper_brain/processor/import_processor/state.py)，以及新增 `src/shopkeeper_brain/processor/import_processor/nodes/node_document_split.py`。
 - 后续验收才修改：`docs/memory/day05-acceptance.md`、`docs/memory/learning-progress.md`。
 - 验收副本和 `chunks.json`：`workspace/verification/day05/`；不复制 `.env` 或 `__pycache__`。
 

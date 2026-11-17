@@ -220,7 +220,7 @@ uv sync
 
 这里继续保留 `deepcopy`。默认状态里的 `chunks`是一个列表，如果多个任务共用同一个列表，某次运行追加的 Chunk 会污染下一次运行。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/state.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/state.py`
 
 ```python
 from copy import deepcopy
@@ -359,7 +359,7 @@ print("chunks 状态隔离：通过")
 
 下面是用户要手敲的完整文件。它保留了当前项目的 `BaseNode`、异常类型和 `create_default_state`命名，并在末尾提供一个学习期真实入口。入口直接读取第 4 节留下的真实 `_new.md`，不会重新调用图片模型或 MinIO。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/nodes/node_document_split.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/nodes/node_document_split.py`
 
 ```python
 import json
@@ -751,7 +751,7 @@ uv run python -m compileall -q src/shopkeeper_brain
 ### 5.2 模块导入和状态隔离
 
 ```bash
-uv run python -c "from shopkeeper_brain.processor.import_process.nodes.node_document_split import NodeDocumentSplit; print(NodeDocumentSplit().name)"
+uv run python -c "from shopkeeper_brain.processor.import_processor.nodes.node_document_split import NodeDocumentSplit; print(NodeDocumentSplit().name)"
 ```
 
 预期观察：输出 `node_document_split`。再运行第 4.2 节的状态隔离探针，确认一个状态追加 `chunks`不会影响另一个状态。
@@ -812,7 +812,7 @@ Chunk 总数必须以你的实际终端输出为准，教程不预填数字。�
 
 | 项目 | 参考资料 | 当前重建项目 |
 | --- | --- | --- |
-| 节点路径 | `processor/import_processor/nodes/node_document_split.py` | `src/shopkeeper_brain/processor/import_process/nodes/node_document_split.py` |
+| 节点路径 | `processor/import_processor/nodes/node_document_split.py` | `src/shopkeeper_brain/processor/import_processor/nodes/node_document_split.py` |
 | 节点基类 | `BaseNode`/课堂版本路径 | 当前项目的 `BaseNode` |
 | 状态结果 | `chunks` | 增加到 `ImportGraphState` |
 | 粗切规则 | Markdown 标题和代码围栏 | 保留标题规则，兼容语言标记围栏 |

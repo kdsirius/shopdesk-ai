@@ -100,9 +100,9 @@ raise ImportProcessError(...) from exc
 
 ```text
 pyproject.toml
-src/shopkeeper_brain/processor/import_process/exceptions.py
-src/shopkeeper_brain/processor/import_process/state.py
-src/shopkeeper_brain/processor/import_process/BaseNode.py
+src/shopkeeper_brain/processor/import_processor/exceptions.py
+src/shopkeeper_brain/processor/import_processor/state.py
+src/shopkeeper_brain/processor/import_processor/BaseNode.py
 ```
 
 先运行：
@@ -124,7 +124,7 @@ uv run python -m compileall -q src/shopkeeper_brain
 
 参考项目后续会有配置错误、PDF 转换错误、向量化错误和存储错误。它们都继承一个导入流程基础异常。本节先保留最小版本。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/exceptions.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/exceptions.py`
 
 ```python
 class ImportProcessError(Exception):
@@ -156,7 +156,7 @@ class ImportProcessError(Exception):
 
 当前阶段只保留骨架真正需要的字段。后面随着 PDF、切片和向量节点增加，再按真实业务增加字段。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/state.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/state.py`
 
 ```python
 from copy import deepcopy
@@ -200,7 +200,7 @@ def create_default_state(**overrides: Unpack[ImportGraphState]) -> ImportGraphSt
 
 参考项目的每个节点都需要开始日志、执行 `process`、完成日志和异常包装。把固定步骤放进基类，具体业务留给子类。
 
-**文件**：`src/shopkeeper_brain/processor/import_process/BaseNode.py`
+**文件**：`src/shopkeeper_brain/processor/import_processor/BaseNode.py`
 
 ```python
 from abc import ABC, abstractmethod
@@ -265,7 +265,7 @@ class BaseNode(ABC):
 
 ```bash
 uv run python -m compileall -q src/shopkeeper_brain
-uv run python -c "from shopkeeper_brain.processor.import_process.BaseNode import BaseNode; from shopkeeper_brain.processor.import_process.exceptions import ImportProcessError; from shopkeeper_brain.processor.import_process.state import create_default_state; print(BaseNode.__name__, ImportProcessError.__name__, create_default_state()['status'])"
+uv run python -c "from shopkeeper_brain.processor.import_processor.BaseNode import BaseNode; from shopkeeper_brain.processor.import_processor.exceptions import ImportProcessError; from shopkeeper_brain.processor.import_processor.state import create_default_state; print(BaseNode.__name__, ImportProcessError.__name__, create_default_state()['status'])"
 ```
 
 预期效果：
@@ -282,7 +282,7 @@ BaseNode ImportProcessError created
 运行：
 
 ```bash
-uv run python -c "from shopkeeper_brain.processor.import_process.state import create_default_state; first=create_default_state(); second=create_default_state(); first['visited_nodes'].append('first'); assert second['visited_nodes']==[], second['visited_nodes']; print('状态隔离验证通过')"
+uv run python -c "from shopkeeper_brain.processor.import_processor.state import create_default_state; first=create_default_state(); second=create_default_state(); first['visited_nodes'].append('first'); assert second['visited_nodes']==[], second['visited_nodes']; print('状态隔离验证通过')"
 ```
 
 预期效果：输出：
@@ -298,7 +298,7 @@ uv run python -c "from shopkeeper_brain.processor.import_process.state import cr
 运行：
 
 ```bash
-uv run python -c "from shopkeeper_brain.processor.import_process.exceptions import ImportProcessError; error=ImportProcessError('读取失败', node_name='node_entry', cause=ValueError('文件不存在')); assert str(error)=='[node_entry] 读取失败 (原因: 文件不存在)'; print(error)"
+uv run python -c "from shopkeeper_brain.processor.import_processor.exceptions import ImportProcessError; error=ImportProcessError('读取失败', node_name='node_entry', cause=ValueError('文件不存在')); assert str(error)=='[node_entry] 读取失败 (原因: 文件不存在)'; print(error)"
 ```
 
 预期效果：输出：
@@ -311,7 +311,7 @@ uv run python -c "from shopkeeper_brain.processor.import_process.exceptions impo
 
 ### 5.4 破坏性验证：确认状态隔离真的被保护
 
-1. 打开 `src/shopkeeper_brain/processor/import_process/state.py`。
+1. 打开 `src/shopkeeper_brain/processor/import_processor/state.py`。
 2. 把：
 
 ```python

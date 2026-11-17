@@ -6,7 +6,7 @@
 
 **已确认范围：** 用户在 2026-11-11 确认按 day03 课堂笔记完成下载、解压、读取 Markdown 和状态回写；明确当天代码快照实际只完成至取得 ZIP 下载链接。day03 入口节点内容不重复讲解。
 
-**结构：** 按 `group-buy-market` 教程的三块方法重构：业务流程与设计原因 → 手敲步骤 → 必做真实验证。先从 PDF 无法直接进入后续切片的具体问题推导 MinerU、配置、状态和节点，再用 `NodePDFToMD.__main__` 作为用户手敲后的真实运行入口。沿用真实工程的 `src/shopkeeper_brain/processor/import_process/`；状态增加 `file_dir`、`md_content`，异常增加配置、文件和 PDF 转换类型；`core/mineru_config.py` 读取带项目前缀的 MinerU 配置；`NodePDFToMD` 负责上传、轮询和产物落盘。保持现有 BaseNode 与路由文件不动。
+**结构：** 按 `group-buy-market` 教程的三块方法重构：业务流程与设计原因 → 手敲步骤 → 必做真实验证。先从 PDF 无法直接进入后续切片的具体问题推导 MinerU、配置、状态和节点，再用 `NodePDFToMD.__main__` 作为用户手敲后的真实运行入口。沿用真实工程的 `src/shopkeeper_brain/processor/import_processor/`；状态增加 `file_dir`、`md_content`，异常增加配置、文件和 PDF 转换类型；`core/mineru_config.py` 读取带项目前缀的 MinerU 配置；`NodePDFToMD` 负责上传、轮询和产物落盘。保持现有 BaseNode 与路由文件不动。
 
 ## 步骤与验证标准
 

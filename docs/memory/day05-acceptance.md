@@ -1,7 +1,7 @@
 # 第 5 节验收记录：文档切片
 
 - 验收日期：2026-11-14
-- 用户真实代码：`src/shopkeeper_brain/processor/import_process/nodes/node_document_split.py`
+- 用户真实代码：`src/shopkeeper_brain/processor/import_processor/nodes/node_document_split.py`
 - 第二轮隔离验收副本：`workspace/verification/day05/formal-acceptance-20261114-rerun/`
 - 第一轮隔离验收副本：`workspace/verification/day05/formal-acceptance-20261114/`
 - 自动化测试：本节没有新增自动化测试文件；测试条数记为无自动化测试。

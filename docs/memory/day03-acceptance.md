@@ -1,8 +1,8 @@
 # 第 3 节验收记录：PDF 转 Markdown 流程
 
 - 验收日期：2026-11-13
-- 用户真实代码：`src/shopkeeper_brain/processor/import_process/`
-- 用户真实运行入口：`src/shopkeeper_brain/processor/import_process/nodes/node_pdf_to_md.py::__main__`
+- 用户真实代码：`src/shopkeeper_brain/processor/import_processor/`
+- 用户真实运行入口：`src/shopkeeper_brain/processor/import_processor/nodes/node_pdf_to_md.py::__main__`
 - 隔离验收副本：`workspace/verification/day03/user-project-rerun-20261113/`
 - 自动化测试：本节没有新增自动化测试文件；测试条数记为无自动化测试。
 - 学习代码提交：`16ae65a feat: 完成 PDF 转 Markdown 导入节点`

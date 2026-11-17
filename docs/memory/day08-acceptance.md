@@ -29,7 +29,7 @@
 
 ### 1. 主体节点 `process()` 缺少第 6 步调用
 
-位置：`src/shopkeeper_brain/processor/import_process/nodes/node_item_name_recognition.py`，第 36—40 行附近。
+位置：`src/shopkeeper_brain/processor/import_processor/nodes/node_item_name_recognition.py`，第 36—40 行附近。
 
 当前 `process()` 在第 5 步生成名称双向量、写入两个状态字段后直接记录完成并返回，未调用 `_step_6_save_to_milvus()`。AST 对当前真实方法的调用核对确认保存调用数量为 0。
 

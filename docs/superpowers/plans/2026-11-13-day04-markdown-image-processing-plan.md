@@ -14,7 +14,7 @@
 
 - 新建：`src/shopkeeper_brain/core/image_config.py`，读取 VL 模型和图片处理配置。
 - 新建：`src/shopkeeper_brain/core/minio_config.py`，读取 MinIO 端点、桶和图片前缀。
-- 新建：`src/shopkeeper_brain/processor/import_process/nodes/node_md_img.py`，实现图片处理节点和学习期 `__main__` 真实入口。
+- 新建：`src/shopkeeper_brain/processor/import_processor/nodes/node_md_img.py`，实现图片处理节点和学习期 `__main__` 真实入口。
 - 修改：`pyproject.toml`，增加 `langchain-openai` 和 `minio` 直接依赖。
 - 修改：`.env.example`，增加不含真实凭证的 VL/MinIO 配置模板。
 - 新建：`docs/study/day04-Markdown图片处理.md`，只写业务原理、手敲代码和真实验证。
