@@ -183,17 +183,12 @@ class NodeItemNameConfirm(NodeBase):
         options: list[str] = []
 
         for result in query_results:
-            extracted_name = result["extracted_name"].strip()
             matches = result["matches"]
 
             high = [m for m in matches if m["score"] > CONFIRM_SCORE]
             if high:
-                # 多个都很像时，优先取与提取名完全相同的；没有就取最高分，Milvus 已按分数排好。
-                picked = next(
-                    (m for m in high if m["item_name"] == extracted_name),
-                    high[0]
-                )
-                confirmed.append(picked["item_name"])
+                # 评分高于 0.85 的都确认：同一产品可能在名称集合里有几种写法，只留一个会让正文检索漏掉另一半 Chunk。
+                confirmed.extend(m["item_name"] for m in high)
                 continue
 
             options.extend(

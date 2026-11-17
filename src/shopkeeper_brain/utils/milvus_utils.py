@@ -63,20 +63,23 @@ def create_hybrid_search_requests(
         dense_vector: list[float],
         sparse_vector: dict[int, float],
         limit: int = 5,
+        expr: str | None = None,
 ) -> list[AnnSearchRequest]:
-    """为同一段文本构造 Dense 与 Sparse 两路检索请求，度量方式与入库时的索引一致。"""
+    """为同一段文本构造 Dense 与 Sparse 两路检索请求，度量方式与入库时的索引一致；expr 是两路共用的过滤表达式。"""
     dense_req = AnnSearchRequest(
         data=[dense_vector],
         anns_field="dense_vector",
         param={"metric_type": "COSINE"},
-        limit=limit
+        limit=limit,
+        expr=expr
     )
 
     sparse_req = AnnSearchRequest(
         data=[sparse_vector],
         anns_field="sparse_vector",
         param={"metric_type": "IP"},
-        limit=limit
+        limit=limit,
+        expr=expr
     )
 
     return [dense_req, sparse_req]
