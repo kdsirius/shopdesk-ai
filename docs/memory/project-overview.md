@@ -17,7 +17,7 @@
 
 - 章节状态、提交基线和下一节门槛只读取 [学习进度](learning-progress.md)，不在本文件另维护进度副本。
 - 教学方式以 [文档区规则](../AGENTS.md)、[教学偏好](teaching-preferences.md) 和用户最新确认的 [第 6 节教程](../study/day06-主体识别.md) 为准；第 3 节作为补充样例。本项目不使用子 agent。
-- 工程使用说明见根 [README](../../README.md)；最近一节的详细证据见 [第 9 节验收记录](day09-acceptance.md) 和 [第 9 节备课记录](day09-preparation.md)，两类集合与入库资料依据见 [第 8 节备课记录](day08-preparation.md)，向量资料错位见 [第 7 节备课记录](day07-preparation.md)。更早验收文件记录当时事实，不把其中“下一节”或环境限制直接当作当前状态。
+- 工程使用说明见根 [README](../../README.md)；最近一节的详细证据见 [第 9 节验收记录](day09-acceptance.md) 和 [第 9 节备课记录](day09-preparation.md)，第 10 节备课与教程验证见 [第 10 节备课记录](day10-preparation.md)，两类集合与入库资料依据见 [第 8 节备课记录](day08-preparation.md)，向量资料错位见 [第 7 节备课记录](day07-preparation.md)。更早验收文件记录当时事实，不把其中“下一节”或环境限制直接当作当前状态。
 - 参考资料物理目录存在错位：`4.视频/day06/`仍是文档切片，主体识别和向量基础资料分布在 day07/day08。后续先读视频目录图片再定真实主题，不能仅按目录编号推断内容。
 - 当前通过实现文件的学习期 `__main__` 验证各节点。导入包 `import_processor/main_graph.py` 只有入口后的路由函数，正式导入主图尚未串齐；查询包 `query_processor/` 的主图已接好路由，但只有产品确认节点有真实逻辑，其余检索、融合、重排和答案节点是占位。包的 CLI 仍是脚手架问候。不能把节点验收当成完整导入图、查询图或 Web 服务已就绪。
 - 导入包原名 `import_process`，已由用户改为 `import_processor`；文档中的路径已同步，以真实源码为准。
