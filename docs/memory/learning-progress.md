@@ -31,7 +31,7 @@
 | 09 | 检索流程骨架与产品确认 | 已通过 | 2026-11-17 | 无自动化测试 | 首轮发现缺 `continue`、主图位置、提示词缩进三处不一致，用户修订后复验 23 项通过；真实 MongoDB、Milvus 与文本模型均有证据，详见 [验收记录](day09-acceptance.md)、[备课记录](day09-preparation.md) |
 | 10 | 向量库检索 | 已通过 | 2026-11-17 | 无自动化测试 | 对应 day11 视频 02 至 06（day10 视频讲的是第 9 节）；用户源码隔离验收全部通过，没有必须修改项，详见 [验收记录](day10-acceptance.md)、[备课记录](day10-preparation.md) |
 | 11 | HyDE 与网络搜索 | 已通过 | 2026-11-17 | 无自动化测试 | 对应 day11 视频 08 至 17、笔记 `14`、`15`；联网搜索改用 Tavily 远程 MCP。首轮发现一处错误导入（指向 workspace 实验目录）和一处缺 `.strip()`，用户修订后复验通过，详见 [验收记录](day11-acceptance.md)、[备课记录](day11-preparation.md) |
-| 12 | RRF 融合与 Rerank 重排 | 未开始 |  |  | 对应 day12 |
+| 12 | RRF 融合与 Rerank 重排 | 已通过 | 2026-11-18 | 无自动化测试 | 对应 day12 视频 02 至 17、笔记 `16`、`17`；重排用阿里云百炼 `qwen3-rerank`。首轮发现一处错误导入（指向 workspace 实验目录）和 `title` 缺 `or ""`，用户修订后复验通过；真实百炼打分与用户日志一致，详见 [验收记录](day12-acceptance.md)、[备课记录](day12-preparation.md) |
 | 13 | Web 服务骨架 | 未开始 |  |  | 对应 day13 |
 | 14 | FastAPI 与 SSE | 未开始 |  |  | 对应 day14 |
 | 15 | API、前端与流式交互 | 未开始 |  |  | 对应 day15 |
@@ -90,6 +90,9 @@
 - 2026-11-17 第 10 节用户代码验收通过：真实源码复制到 `workspace/verification/day10/formal-acceptance-20261117/project/`，过滤检索（命中 5 条、不存在商品 0 条）、边界探针、第 6 步新规则、主图和破坏性实验均通过，没有必须修改项；仅有一条不影响行为的可选建议。用户提交前把 `process()` 的占位注释改成了 docstring（验收时的可选建议），编译通过，其余与验收版本一致；代码提交 `0bb821b`，教程与验收文档提交 `6b157d8`。第 9 节教程第 6 步与现在的代码在“只选一个”处有历史差异，以本节教程为准。
 - 2026-11-17 第 11 节教程已交付：`docs/study/day11-HyDE与网络搜索.md`。范围为 `node_search_embedding_hyde`、`node_web_search_mcp` 和新配置 `core/tavily_config.py`；视频 07（导入全流程测试）经用户确认不并入本节。联网搜索按用户要求改用 Tavily 远程 MCP（官方 `mcp` 包，`uv add mcp`），运行期故障两路都降级为空列表。教程代码在隔离副本中用真实文本模型、BGE-M3、Milvus、Tavily 和 MongoDB 临时库验证，细节见 [备课记录](day11-preparation.md)；用户代码尚未验收。`.env.example` 里用户自己追加的 Tavily 两行尚未提交。
 - 2026-11-17 第 11 节用户代码验收通过：真实源码复制到 `workspace/verification/day11/formal-acceptance-20261117/project/`，用户日志与隔离探针均通过；首轮发现联网搜索节点导入被 IDE 自动补成 `workspace.verification...`（必须改）和 `snippet` 缺 `.strip()`（建议改），用户修订后复验通过，没有遗留项。代码和教程、验收文档尚未提交，提交基线待用户提交后补记；详见 [验收记录](day11-acceptance.md)。
+- 2026-11-17 第 11 节提交后核对：代码 `c65801b`，教程与验收文档 `2578de1`，README 与概览同步 `032b889`。
+- 2026-11-17 第 12 节教程已交付：`docs/study/day12-RRF融合与Rerank重排.md`。范围为 `node_rrf`、`node_rerank`、新配置 `core/rerank_config.py` 和 `utils/rerank_utils.py`，依赖 `dashscope`（`uv add`），配置变量 `SHOPKEEPER_BRAIN_RERANK_MODEL`、`..._INSTRUCT`、`..._API_KEY`（密钥只在本地 `.env`）。教程代码在隔离副本中编译通过，RRF 用真实向量检索和 HyDE 数据验证，查询主图三路并行后经融合与重排（降级路径）汇合；**真实重排打分未运行**，因为本机没有百炼密钥，用户需要在 `.env` 里填写后才能验证。细节见 [备课记录](day12-preparation.md)。
+- 2026-11-18 第 12 节首轮验收：用户真实源码与日志（含真实百炼打分）整体通过，隔离副本 25 项探针和真实重排对照通过；发现一处必须改（`node_rerank.py` 第 7 行 IDE 自动补的 `workspace.verification...` 错误导入，脱离 IDE 导入失败）和一处建议改（`title` 缺 `or ""`），用户修订后同日复验通过，没有遗留项；代码和教程、验收文档尚未提交，提交基线待用户提交后补记。详见 [验收记录](day12-acceptance.md)。
 
 ## 欠账
 
@@ -97,7 +100,7 @@
 | --- | --- | --- |
 | 查询融合、重排、答案输出和 Web 链路 | 后续对应章节 | 尚未进入相应实现与验收；按原项目能力逐节重建，不因依赖安装或参考资料存在就记为通过 |
 | 导入全流程测试（day11 视频 07） | 11 | 需要先有导入主图 `import_processor/main_graph.py`，目前只有入口路由；经用户确认不并入第 11 节，后续在导入主图或服务集成章节再安排 |
-| 后续章节资料范围 | 12-16 | 第 11 节资料与验收已闭环；后续仍按视频目录图片、课堂笔记和代码、补充笔记的顺序定位，先核对物理目录与业务章节，不默认执行未知参考脚本 |
+| 后续章节资料范围 | 13-16 | 第 11 节资料与验收已闭环；后续仍按视频目录图片、课堂笔记和代码、补充笔记的顺序定位，先核对物理目录与业务章节，不默认执行未知参考脚本 |
 | 第 3 节 MinerU 异常边界 | 03 | 已验证一个真实 PDF 的成功链路；长时间超时、网络中断、损坏 ZIP、缺少 full.md 和更多加密 PDF 兼容性未单独验证 |
 | 第 3 节 Python 3.11 真实外部链路 | 03 | 第 3 节当时的完整 MinerU 隔离运行使用 3.12.9；后续 3.11.15 的编译与 BGE 验证不等于在 3.11 重新请求 MinerU |
 
@@ -106,7 +109,7 @@
 ## 下一节接手门槛
 
 - 先执行只读 `git status --short` 和最近提交核对，保留已有改动；读取根、文档区和参考区规则、README、项目概览、教学偏好、本进度与 [第 8 节验收](day08-acceptance.md)、[备课记录](day08-preparation.md)。固定教学样例仍是第 6 节，不使用子 agent、多 agent 或自动 fork 的审阅技能。
-- 第 1 至第 11 节均已通过；第 10 节已提交（`0bb821b`、`6b157d8`），第 11 节已提交（`c65801b`、`2578de1`）。读取 [第 11 节验收](day11-acceptance.md) 与 [备课记录](day11-preparation.md)。下一节为第 12 节“RRF 融合与 Rerank 重排”，对应 day12 笔记 `16`、`17` 与补充笔记 `18`、`19`；先看 day12 视频目录图片核对真实范围，再做资料摸底，先向用户说明范围，确认后再写教程。已知的待核对点：Rerank 笔记里调用 `utils.reranker_http_utils.rerank_documents`（外部或本地重排服务），要先弄清用什么模型和服务、是否需要密钥，再决定验证方式。
+- 第 1 至第 11 节均已通过；第 10 节已提交（`0bb821b`、`6b157d8`），第 11 节已提交（`c65801b`、`2578de1`）。读取 [第 11 节验收](day11-acceptance.md) 与 [备课记录](day11-preparation.md)。第 12 节“RRF 融合与 Rerank 重排”已通过（2026-11-18，等待用户提交），读取 [第 12 节验收](day12-acceptance.md) 与 [备课记录](day12-preparation.md)；重排用阿里云百炼 `qwen3-rerank`，密钥在本地 `.env`。第 12 节提交后再补记基线并给出第 13 节接手提示词。
 - 先看相关视频目录图片，再读当天课堂笔记和代码，最后读 `1.笔记/` 补充资料。物理 day 编号存在错位，要核对第 11 节收口和需要续接的目录，不能按文件夹编号直接认定主题。
 - 第 11 节结果：`node_search_embedding_hyde` 返回 `hyde_embedding_chunks`，`node_web_search_mcp` 返回 `web_search_docs`（元素是 `{title, url, snippet}`，`snippet` 已截断到 500 字，来自 Tavily 的 `content`）；两路运行期故障返回空列表，所以后面的 RRF 和 Rerank 必须能处理这两个字段为空的情况。向量检索与 HyDE 的元素保持 PyMilvus 原形状（`chunk_id`、`distance`、`entity`）。联网搜索的相关性有浮动，会混入无关页面，交给重排处理。Tavily 密钥只在本地 `.env`，依赖已新增 `mcp`；`mcp 2.3.0` 的客户端接口是新版（`Client`、`is_error`、`httpx2`），与网上多数 1.x 示例不同。
 - 第 9 节结果：查询骨架在 `processor/query_processor/`（`main_graph.py` 在该目录，节点在 `nodes/`），导入包已由用户改名为 `import_processor`，后续教程和验收以真实包名为准。产品确认只查 `kb_item_names`，第 10 节才检索 `kb_chunks` 正文；三个并行检索节点只返回各自字段，`hybrid_search` 目前没有过滤表达式参数，第 10 节按需追加。
