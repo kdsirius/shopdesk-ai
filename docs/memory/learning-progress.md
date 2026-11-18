@@ -13,8 +13,8 @@
 | 参考项目 | `reference/掌教智库/` |
 | 环境与构建 | Python 声明 `>=3.11`，工程选择 3.11；最近实际验收为 CPython 3.11.15。按锁文件在 workspace 副本同步与编译，方法见 [验收手册](verification-playbook.md) |
 | 验证方式 | 当前无项目 pytest 套件；使用 IDE 学习入口、真实输入与隔离行为探针，不把探针项数当测试条数 |
-| 已核对提交 | 第 8 节为 `29d2830`；第 9 节代码为 `3552bc9`，教程与验收文档为 `99105f0`（用户提交时 `-m` 引号写进了标题，不影响内容）。其后的包名路径同步与记忆收尾以实际 Git 日志为准；第 10 节代码为 `0bb821b`，教程与验收文档为 `6b157d8`；第 11 节代码为 `c65801b`，教程与验收文档为 `2578de1`；第 12 节代码为 `508d36e`，教程与验收文档为 `bc5e80f` |
-| 最近实测基线 | 第 11 节：用户真实源码隔离验收通过，真实文本模型、BGE-M3、Milvus 与 Tavily 远程 MCP 的 HyDE 检索和联网搜索、输入契约、降级路径均通过，详见 [第 11 节验收](day11-acceptance.md)；第 10 节见 [第 10 节验收](day10-acceptance.md)，第 9 节见 [第 9 节验收](day09-acceptance.md) |
+| 已核对提交 | 第 8 节为 `29d2830`；第 9 节代码为 `3552bc9`，教程与验收文档为 `99105f0`（用户提交时 `-m` 引号写进了标题，不影响内容）。其后的包名路径同步与记忆收尾以实际 Git 日志为准；第 10 节代码为 `0bb821b`，教程与验收文档为 `6b157d8`；第 11 节代码为 `c65801b`，教程与验收文档为 `2578de1`；第 12 节代码为 `508d36e`，教程与验收文档为 `bc5e80f`。第 13 节代码、教程与验收文档为 `e3ff008` |
+| 最近实测基线 | 第 13 节：用户浏览器自测通过，用户源码隔离运行 `GET /` 和 `GET /health` 均返回 200，详见 [第 13 节验收](day13-acceptance.md)；真实百炼重排见 [第 12 节验收](day12-acceptance.md)，HyDE 和联网搜索见 [第 11 节验收](day11-acceptance.md) |
 
 ## 章节表
 
@@ -32,7 +32,7 @@
 | 10 | 向量库检索 | 已通过 | 2026-11-17 | 无自动化测试 | 对应 day11 视频 02 至 06（day10 视频讲的是第 9 节）；用户源码隔离验收全部通过，没有必须修改项，详见 [验收记录](day10-acceptance.md)、[备课记录](day10-preparation.md) |
 | 11 | HyDE 与网络搜索 | 已通过 | 2026-11-17 | 无自动化测试 | 对应 day11 视频 08 至 17、笔记 `14`、`15`；联网搜索改用 Tavily 远程 MCP。首轮发现一处错误导入（指向 workspace 实验目录）和一处缺 `.strip()`，用户修订后复验通过，详见 [验收记录](day11-acceptance.md)、[备课记录](day11-preparation.md) |
 | 12 | RRF 融合与 Rerank 重排 | 已通过 | 2026-11-18 | 无自动化测试 | 对应 day12 视频 02 至 17、笔记 `16`、`17`；重排用阿里云百炼 `qwen3-rerank`。首轮发现一处错误导入（指向 workspace 实验目录）和 `title` 缺 `or ""`，用户修订后复验通过；真实百炼打分与用户日志一致，详见 [验收记录](day12-acceptance.md)、[备课记录](day12-preparation.md) |
-| 13 | Web 服务骨架 | 已通过 | 2026-11-18 | 无自动化测试 | 用户浏览器自测及真实源码隔离 HTTP 验收通过，代码待用户提交。资料对应 day13 的 HTML/CSS/JavaScript 入门与 day14 的服务启动部分，详见 [验收记录](day13-acceptance.md)、[备课记录](day13-preparation.md) |
+| 13 | Web 服务骨架 | 已通过 | 2026-11-18 | 无自动化测试 | 用户浏览器自测及真实源码隔离 HTTP 验收通过，代码和文档已提交（`e3ff008`）。资料对应 day13 的 HTML/CSS/JavaScript 入门与 day14 的服务启动部分，详见 [验收记录](day13-acceptance.md)、[备课记录](day13-preparation.md) |
 | 14 | FastAPI 与 SSE | 未开始 |  |  | 对应 day14 |
 | 15 | API、前端与流式交互 | 未开始 |  |  | 对应 day15 |
 | 16 | 答案输出与项目收敛 | 未开始 |  |  | 对应 day16 |
@@ -98,9 +98,9 @@
 
 | 欠账 | 来源章节 | 为什么还没做 |
 | --- | --- | --- |
-| 查询融合、重排、答案输出和 Web 链路 | 后续对应章节 | 尚未进入相应实现与验收；按原项目能力逐节重建，不因依赖安装或参考资料存在就记为通过 |
+| SSE、业务 API 与前端集成、答案输出 | 14–16 | 已具备同源状态页和健康接口。各项业务能力按后续章节实现和验收 |
 | 导入全流程测试（day11 视频 07） | 11 | 需要先有导入主图 `import_processor/main_graph.py`，目前只有入口路由；经用户确认不并入第 11 节，后续在导入主图或服务集成章节再安排 |
-| 后续章节资料范围 | 13-16 | 第 11 节资料与验收已闭环；后续仍按视频目录图片、课堂笔记和代码、补充笔记的顺序定位，先核对物理目录与业务章节，不默认执行未知参考脚本 |
+| 后续章节资料范围 | 14–16 | 按视频目录图片、课堂笔记和代码、补充笔记的顺序核对物理目录与业务章节 |
 | 第 3 节 MinerU 异常边界 | 03 | 已验证一个真实 PDF 的成功链路；长时间超时、网络中断、损坏 ZIP、缺少 full.md 和更多加密 PDF 兼容性未单独验证 |
 | 第 3 节 Python 3.11 真实外部链路 | 03 | 第 3 节当时的完整 MinerU 隔离运行使用 3.12.9；后续 3.11.15 的编译与 BGE 验证不等于在 3.11 重新请求 MinerU |
 
@@ -108,16 +108,16 @@
 
 ## 下一节接手门槛
 
-- 先执行只读 `git status --short` 和最近提交核对，保留已有改动；读取根、文档区和参考区规则、README、项目概览、教学偏好、本进度与 [第 8 节验收](day08-acceptance.md)、[备课记录](day08-preparation.md)。固定教学样例仍是第 6 节，不使用子 agent、多 agent 或自动 fork 的审阅技能。
-- 第 1 至第 12 节均已通过并提交：第 11 节（`c65801b`、`2578de1`），第 12 节（`508d36e`、`bc5e80f`）。读取 [第 12 节验收](day12-acceptance.md) 与 [备课记录](day12-preparation.md)。下一节为第 13 节“Web 服务骨架”（对应 day13），先看 day13 视频目录图片核对真实范围；day12 的课堂笔记文件夹混着 01 至 17 全部笔记，其中 `18`、`19` 之后的内容（笔记 `1.笔记/` 里的 11、13、20：Web 服务集成、Web 服务端搭建、答案输出）要核对归属哪一节，先向用户说明范围，确认后再写教程。
-- 先看相关视频目录图片，再读当天课堂笔记和代码，最后读 `1.笔记/` 补充资料。物理 day 编号存在错位，要核对第 12 节收口和需要续接的目录，不能按文件夹编号直接认定主题。
+- 先执行只读 `git status --short` 和最近提交核对，保留已有改动。读取根、文档区和参考区规则、README、项目概览、教学偏好、本进度及 [第 13 节验收](day13-acceptance.md)、[备课记录](day13-preparation.md)。固定教学样例仍是第 6 节，不使用子 agent、多 agent 或自动 fork 的审阅技能。
+- 下一节是第 14 节「FastAPI 与 SSE」。读取实际 Web 入口 [api/main.py](../../src/shopkeeper_brain/api/main.py) 和 [状态页](../../src/shopkeeper_brain/front/index.html)，以已验收的 `GET /` 与同源 `GET /health` 为基线。FastAPI 和 Uvicorn 已声明为直接依赖，以实际锁文件为准。
+- 先看 day14 视频目录图片，再读当天课堂笔记和代码，最后读 `1.笔记/` 中的 `11` 与 `13` 等补充资料。第 13 节已使用 day14 视频 02 的启动与调试部分。核对输入校验与 SSE 的范围后，先向用户简述并确认，再写教程。业务 API 与前端集成归第 15 节，答案输出归第 16 节。
 - 第 12 节结果：`node_rrf` 返回 `rrf_chunks`（`entity` 字典列表，含 `chunk_id`、`content`、`item_name`，不含分数），`node_rerank` 返回 `reranked_docs`（元素 `{content, title, chunk_id, url, source, score}`，`source` 为 `local` 或 `web`，3 到 10 条；重排失败降级时只含本地结果且 `score` 为 `None`）。答案输出节点要读取 `reranked_docs`，并同时处理 `score` 为 `None` 和联网结果有 `url` 的情况。重排依赖 `dashscope`，配置变量 `SHOPKEEPER_BRAIN_RERANK_*`，密钥只在本地 `.env`。
 - 第 11 节结果：`node_search_embedding_hyde` 返回 `hyde_embedding_chunks`，`node_web_search_mcp` 返回 `web_search_docs`（元素是 `{title, url, snippet}`，`snippet` 已截断到 500 字，来自 Tavily 的 `content`）；两路运行期故障返回空列表，所以后面的 RRF 和 Rerank 必须能处理这两个字段为空的情况。向量检索与 HyDE 的元素保持 PyMilvus 原形状（`chunk_id`、`distance`、`entity`）。联网搜索的相关性有浮动，会混入无关页面，交给重排处理。Tavily 密钥只在本地 `.env`，依赖已新增 `mcp`；`mcp 2.3.0` 的客户端接口是新版（`Client`、`is_error`、`httpx2`），与网上多数 1.x 示例不同。
-- 第 9 节结果：查询骨架在 `processor/query_processor/`（`main_graph.py` 在该目录，节点在 `nodes/`），导入包已由用户改名为 `import_processor`，后续教程和验收以真实包名为准。产品确认只查 `kb_item_names`，第 10 节才检索 `kb_chunks` 正文；三个并行检索节点只返回各自字段，`hybrid_search` 目前没有过滤表达式参数，第 10 节按需追加。
+- 第 9 节结果：查询骨架在 `processor/query_processor/`（`main_graph.py` 在该目录，节点在 `nodes/`），导入包已由用户改名为 `import_processor`，后续教程和验收以真实包名为准。产品确认只查 `kb_item_names`，第 10 节才检索 `kb_chunks` 正文；三个并行检索节点只返回各自字段；正文检索从第 10 节起支持商品过滤。
 - 第 8 节正式数据源为 Milvus 的 `kb_item_names` 和 `kb_chunks`：验收时分别有 `RS PRO RS-12 数字万用表` 的 1 条主体记录和 21 条 Chunk。名称主键为 `pk`，Chunk 主键为 `chunk_id`。保留的 `verify_d08_b5001e7810_*` 集合仅供实验，不能用于产品确认或正文查询。
 - 第 7 节 `workspace/day07-real-run/state_vector.json` 仍是向量备份，Sparse 键是字符串且没有第 8 节回填的 `chunk_id`；原 `chunks.json` 也不是可替代的查询输入。后续从数据库读取真实主键，不为接手重新解析、识别、向量化或导入前八节。
 - Milvus 在虚拟机 `192.168.150.120:19530`，验收版本为服务端 2.5.5、PyMilvus 3.0.3、pymilvus-model 0.3.4；本地 BGE-M3 为 CPU/FP32。开始前只读核对当前连接、配置和集合，不能把历史在线记录当作当前在线，更不能重建或清空服务。任何必要数据库写入都须明确实验范围。MongoDB 在虚拟机 `192.168.150.120:27017`（容器 `my-mongo`，镜像 `mongo:7.0`，root 用户 `admin`，已启用密码）；密码只在用户本地 `.env`，不得写入仓库文档或日志，验证时用环境变量传入，写入只限实验会话。
-- 三项第 8 节问题已复验解决；第 7 节未使用导入已移除，getter 已统一为 `get_bge_m3_ef`。导入包的 `main_graph.py` 仍只有入口路由，CLI 仍是问候。查询图 `query_processor/main_graph.py` 已接好路由，产品确认、`node_search_embedding`（第 10 节）、`node_search_embedding_hyde` 和 `node_web_search_mcp`（第 11 节）有真实逻辑，`node_rrf`、`node_rerank`（第 12 节）已有真实逻辑，只有 `node_answer_output` 仍是返回空值的占位，由第 16 节补；`create_hybrid_search_requests` 已有 `expr` 过滤参数；不要误认为检索、重排、答案输出或 HTTP 服务已就绪。
+- 三项第 8 节问题已复验解决；第 7 节未使用导入已移除，getter 已统一为 `get_bge_m3_ef`。导入包的 `main_graph.py` 仍只有入口路由，CLI 仍是问候。查询图 `query_processor/main_graph.py` 已接好路由，产品确认、`node_search_embedding`（第 10 节）、`node_search_embedding_hyde` 和 `node_web_search_mcp`（第 11 节）有真实逻辑，`node_rrf`、`node_rerank`（第 12 节）已有真实逻辑，只有 `node_answer_output` 仍是返回空值的占位，由第 16 节补；`create_hybrid_search_requests` 已有 `expr` 过滤参数。业务 Web 接口将在后续章节接入。
 - 导入包已改名为 `import_processor`，2026-11-17 已把前九节教程、计划、设计和验收记录中的包路径同步为新名称，只改路径文字，没有改其他内容；以后路径以真实源码为准。
 - 教程保持三块正文、代码旁短讲、图后白话和 IDE/学习期 `__main__` 真实验证；除包路径同步外不回改已通过教程，不代写 `src/`。Git 只读，依赖使用 uv 与清华源，临时文件统一放 `workspace/`，无法运行的项目如实标记。
 
