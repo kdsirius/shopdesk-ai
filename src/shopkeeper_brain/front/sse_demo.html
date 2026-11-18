@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>SSE 进度练习</title>
+</head>
+<body>
+    <h1>SSE 进度练习</h1>
+    <button id="start-stream" type="button">开始接收</button>
+    <pre id="stream-result" aria-live="polite">等待连接</pre>
+
+    <script>
+        const button = document.getElementById("start-stream");
+        const result = document.getElementById("stream-result");
+
+        button.addEventListener("click", () => {
+            button.disabled = true;
+            result.textContent = "正在连接…\n";
+            const source = new EventSource("/demo/stream/14?steps=3");
+
+            source.addEventListener("progress", (event) => {
+                const { run_id, step, total } = JSON.parse(event.data);
+                result.textContent += `演示 ${run_id}：第 ${step}/${total} 步\n`;
+            });
+
+            source.addEventListener("complete", (event) => {
+                result.textContent += event.data;
+                source.close();
+                button.disabled = false;
+            });
+
+            source.onerror = () => {
+                result.textContent += "连接失败，请检查网络面板。";
+                source.close();
+                button.disabled = false;
+            };
+        });
+    </script>
+</body>
+</html>
