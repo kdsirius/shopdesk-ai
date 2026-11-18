@@ -32,7 +32,7 @@
 | 10 | 向量库检索 | 已通过 | 2026-11-17 | 无自动化测试 | 对应 day11 视频 02 至 06（day10 视频讲的是第 9 节）；用户源码隔离验收全部通过，没有必须修改项，详见 [验收记录](day10-acceptance.md)、[备课记录](day10-preparation.md) |
 | 11 | HyDE 与网络搜索 | 已通过 | 2026-11-17 | 无自动化测试 | 对应 day11 视频 08 至 17、笔记 `14`、`15`；联网搜索改用 Tavily 远程 MCP。首轮发现一处错误导入（指向 workspace 实验目录）和一处缺 `.strip()`，用户修订后复验通过，详见 [验收记录](day11-acceptance.md)、[备课记录](day11-preparation.md) |
 | 12 | RRF 融合与 Rerank 重排 | 已通过 | 2026-11-18 | 无自动化测试 | 对应 day12 视频 02 至 17、笔记 `16`、`17`；重排用阿里云百炼 `qwen3-rerank`。首轮发现一处错误导入（指向 workspace 实验目录）和 `title` 缺 `or ""`，用户修订后复验通过；真实百炼打分与用户日志一致，详见 [验收记录](day12-acceptance.md)、[备课记录](day12-preparation.md) |
-| 13 | Web 服务骨架 | 未开始 |  |  | 对应 day13 |
+| 13 | Web 服务骨架 | 已通过 | 2026-11-18 | 无自动化测试 | 用户浏览器自测及真实源码隔离 HTTP 验收通过，代码待用户提交。资料对应 day13 的 HTML/CSS/JavaScript 入门与 day14 的服务启动部分，详见 [验收记录](day13-acceptance.md)、[备课记录](day13-preparation.md) |
 | 14 | FastAPI 与 SSE | 未开始 |  |  | 对应 day14 |
 | 15 | API、前端与流式交互 | 未开始 |  |  | 对应 day15 |
 | 16 | 答案输出与项目收敛 | 未开始 |  |  | 对应 day16 |
