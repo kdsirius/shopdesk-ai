@@ -21,6 +21,7 @@ dependencies = [
     "modelscope>=1.40.3",
     "pymongo>=4.20.0",
     "mcp>=2.3.0",
+    "dashscope>=2.1.0",
 ]
 
 [project.scripts]
