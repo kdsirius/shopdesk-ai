@@ -17,9 +17,9 @@
 
 - 章节状态、提交基线和下一节门槛只读取 [学习进度](learning-progress.md)，不在本文件另维护进度副本。
 - 教学方式以 [文档区规则](../AGENTS.md)、[教学偏好](teaching-preferences.md) 和用户最新确认的 [第 6 节教程](../study/day06-主体识别.md) 为准；第 3 节作为补充样例。本项目不使用子 agent。
-- 工程使用说明见根 [README](../../README.md)。FastAPI 输入校验和 SSE 见[第 14 节验收记录](day14-acceptance.md)与[备课记录](day14-preparation.md)。Web 服务骨架见 [第 13 节验收记录](day13-acceptance.md) 和 [第 13 节备课记录](day13-preparation.md)，融合与重排见 [第 12 节验收记录](day12-acceptance.md) 和 [第 12 节备课记录](day12-preparation.md)，HyDE 与联网搜索见 [第 11 节验收记录](day11-acceptance.md) 和 [第 11 节备课记录](day11-preparation.md)，向量检索见 [第 10 节验收记录](day10-acceptance.md) 和 [第 10 节备课记录](day10-preparation.md)，查询骨架与产品确认见 [第 9 节验收记录](day09-acceptance.md) 和 [第 9 节备课记录](day09-preparation.md)，两类集合与入库资料依据见 [第 8 节备课记录](day08-preparation.md)，向量资料错位见 [第 7 节备课记录](day07-preparation.md)。更早验收文件记录当时事实，不把其中“下一节”或环境限制直接当作当前状态。
+- 工程使用说明见根 [README](../../README.md)。业务上传、查询进度和会话历史见[第 15 节验收记录](day15-acceptance.md)。FastAPI 输入校验和 SSE 见[第 14 节验收记录](day14-acceptance.md)与[备课记录](day14-preparation.md)。Web 服务骨架见 [第 13 节验收记录](day13-acceptance.md) 和 [第 13 节备课记录](day13-preparation.md)，融合与重排见 [第 12 节验收记录](day12-acceptance.md) 和 [第 12 节备课记录](day12-preparation.md)，HyDE 与联网搜索见 [第 11 节验收记录](day11-acceptance.md) 和 [第 11 节备课记录](day11-preparation.md)，向量检索见 [第 10 节验收记录](day10-acceptance.md) 和 [第 10 节备课记录](day10-preparation.md)，查询骨架与产品确认见 [第 9 节验收记录](day09-acceptance.md) 和 [第 9 节备课记录](day09-preparation.md)，两类集合与入库资料依据见 [第 8 节备课记录](day08-preparation.md)，向量资料错位见 [第 7 节备课记录](day07-preparation.md)。更早验收文件记录当时事实，不把其中“下一节”或环境限制直接当作当前状态。
 - 参考资料物理目录存在错位：`4.视频/day06/`仍是文档切片，主体识别和向量基础资料分布在 day07/day08。后续先读视频目录图片再定真实主题，不能仅按目录编号推断内容。
-- 当前通过实现文件的学习期 `__main__` 验证各节点。导入包 `import_processor/main_graph.py` 只有入口后的路由函数，正式导入主图尚未串齐；查询包 `query_processor/` 的主图已接好路由，产品确认、三路检索（向量检索、HyDE、Tavily 联网搜索）、RRF 融合和百炼重排有真实逻辑，只剩答案输出节点是占位。包的 CLI 仍是脚手架问候。Web 服务由 [api/main.py](../../src/shopkeeper_brain/api/main.py) 启动，`GET /` 提供状态页，按钮调用同源的 `GET /health`。已提供 JSON 校验和 SSE 进度练习。业务 API 与前端集成按后续章节接入。
+- Web 服务由 [api/main.py](../../src/shopkeeper_brain/api/main.py) 启动。状态首页连接同源导入页与查询页：上传触发导入图，按任务 ID 轮询；查询用 `run_id` 收 SSE 进度，用 `session_id` 读 MongoDB 历史。查询执行到 Rerank 后的答案节点原样传递状态，尚未生成答案。各节点仍可通过学习期 `__main__` 单独验证，CLI 仍是脚手架问候。
 - 导入包原名 `import_process`，已由用户改为 `import_processor`；文档中的路径已同步，以真实源码为准。
 - 第 5 节原 `chunks.json` 没有主体字段；第 6 节只在内存回填。第 7 节用户新产物 `workspace/day07-real-run/state_vector.json` 已有 `item_name`、两个名称向量字段及 21 个带双向量的 Chunk；第 8 节读取这份状态完成真实入库，后续产品确认和正文查询承接数据库记录，不为接手重复执行前八节导入。
 - Milvus 两类记录分别为 `kb_item_names`（自增 `pk`）和 `kb_chunks`（自增 `chunk_id`）。两集合均按 `file_title` 删除后插入；名称字段不回填主键，Chunk 主键只回填本次返回状态，没有新建含主键的 JSON 备份。重复导入主键可变，旧备份不能当成带当前数据库主键的状态。
@@ -59,7 +59,7 @@ flowchart LR
 
 文本与视觉模型通过 OpenAI 兼容客户端连接，具体服务地址和模型名由本地配置决定；参考笔记中的 DashScope/Qwen 不是本工程唯一固定服务商。BGE-M3 当前按本地模型目录运行。
 
-第 9 节已落地查询流程骨架、产品确认和 MongoDB 会话历史（PyMongo，连接虚拟机 MongoDB，库 `kb001`、集合 `chat_message`，连接串只在本地 `.env`）。第 10 节落地了 `kb_chunks` 的 Dense + Sparse 混合检索（按已确认商品名过滤，`create_hybrid_search_requests` 带 `expr` 参数）。第 11 节落地了 HyDE 检索（文本模型写假设答案，与问题拼接后混合检索）和 Tavily 联网搜索（官方 `mcp` 包连 Tavily 远程 MCP 的 `tavily_search`，配置 `core/tavily_config.py`，密钥只在本地 `.env`，地址留空时用官方地址）；这两路运行期故障降级为空列表，向量检索主路仍异常外抛。第 12 节落地了 RRF 融合（向量检索与 HyDE 两路，k=60，联网搜索不参与）和重排（合并本地与联网结果，阿里云百炼 `qwen3-rerank`，通过 `dashscope` 包，配置 `core/rerank_config.py`，密钥只在本地 `.env`；断崖检测动态保留 3 到 10 条）；重排出错时降级为只保留本地结果、沿用 RRF 顺序。第 13 节用 FastAPI/Uvicorn 提供同源状态页和健康接口。第 14 节加入 Pydantic 输入校验与 SSE 练习，验证了浏览器逐条收流和完成后关闭。业务 API、业务前端和答案输出按学习进度推进。
+第 9 节已落地查询流程骨架、产品确认和 MongoDB 会话历史（PyMongo，连接虚拟机 MongoDB，库 `kb001`、集合 `chat_message`，连接串只在本地 `.env`）。第 10 节落地了 `kb_chunks` 的 Dense + Sparse 混合检索（按已确认商品名过滤，`create_hybrid_search_requests` 带 `expr` 参数）。第 11 节落地了 HyDE 检索（文本模型写假设答案，与问题拼接后混合检索）和 Tavily 联网搜索（官方 `mcp` 包连 Tavily 远程 MCP 的 `tavily_search`，配置 `core/tavily_config.py`，密钥只在本地 `.env`，地址留空时用官方地址）；这两路运行期故障降级为空列表，向量检索主路仍异常外抛。第 12 节落地了 RRF 融合（向量检索与 HyDE 两路，k=60，联网搜索不参与）和重排（合并本地与联网结果，阿里云百炼 `qwen3-rerank`，通过 `dashscope` 包，配置 `core/rerank_config.py`，密钥只在本地 `.env`；断崖检测动态保留 3 到 10 条）；重排出错时降级为只保留本地结果、沿用 RRF 顺序。第 13 节用 FastAPI/Uvicorn 提供同源状态页和健康接口。第 14 节加入 Pydantic 输入校验与 SSE 练习，验证了浏览器逐条收流和完成后关闭。第 15 节接通业务上传、后台导入、进度轮询、查询 SSE 和历史读取。任务与 SSE 队列在单进程内存中，历史持久化于 MongoDB。真实 Markdown 入库已自测，PDF Web 整链未运行。
 
 ## 代码地图
 
@@ -68,14 +68,15 @@ flowchart LR
 | 位置 | 当前职责 |
 | --- | --- |
 | [core/](../../src/shopkeeper_brain/core/) | MinerU、图片/MinIO、文本模型、本地 Embedding、Milvus、MongoDB 和 Tavily 配置 |
-| [processor/import_processor/](../../src/shopkeeper_brain/processor/import_processor/) | 导入流程：BaseNode、异常（含 MilvusError）、状态和入口路由函数 |
+| [processor/import_processor/](../../src/shopkeeper_brain/processor/import_processor/) | 导入主图、状态、BaseNode 和异常；按 PDF／Markdown 分流后汇合入库 |
 | [import_processor/nodes/](../../src/shopkeeper_brain/processor/import_processor/nodes/) | 入口、PDF 转换、图片处理、切片、主体识别及名称保存、BGE 向量化、Chunk 入库节点 |
 | [processor/query_processor/](../../src/shopkeeper_brain/processor/query_processor/) | 查询流程：NodeBase、状态、主图路由；`nodes/` 里产品确认、三路检索、融合和重排节点有真实逻辑，答案输出节点为占位 |
 | [utils/](../../src/shopkeeper_brain/utils/) | BGE-M3 模型复用与向量转换；Milvus 客户端复用、过滤转义、JSON Sparse 键恢复和混合检索；MongoDB 会话历史读写 |
-| [api/](../../src/shopkeeper_brain/api/) | FastAPI 服务入口，提供状态页、健康检查、JSON 校验练习和 SSE 进度流 |
-| [front/](../../src/shopkeeper_brain/front/) | 同源状态页与 SSE 练习页，分别调用健康接口和订阅进度事件 |
+| [api/](../../src/shopkeeper_brain/api/) | FastAPI 启动入口、状态与练习路由、上传、任务状态、查询、一次性 SSE 订阅和历史路由 |
+| [services/](../../src/shopkeeper_brain/services/) | 执行导入和查询后台任务，将图更新转换为任务快照或 SSE 事件 |
+| [front/](../../src/shopkeeper_brain/front/) | 同源状态页、SSE 练习页、导入页和查询页 |
 
-参考项目的 `api → services → processor` 分层及共享 `schema/core/utils` 是后续对照依据；当前并没有据此创建所有 API、服务、查询流程或前端目录。新增模块的路径和职责仍以实际源码及已确认教程为准。
+当前业务调用方向为 `api → services → processor`，前端通过同源 API 访问业务。共享配置和工具位于 `core`、`utils`。
 
 ## 重要边界
 

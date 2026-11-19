@@ -6,11 +6,13 @@
 
 ## 现有实现与运行入口
 
-学习代码位于 [src/shopkeeper_brain](src/shopkeeper_brain/)，包括入口路由、PDF 转 Markdown、图片摘要与 MinIO 替换、文档切片、主体识别、BGE-M3 名称和切片双向量化，Milvus 主体名称与 Chunk 入库，以及查询流程骨架、MongoDB 会话历史和产品名称确认。产品确认后的三路检索：正文向量检索（`node_search_embedding`）、HyDE 假设性文档检索（`node_search_embedding_hyde`）和 Tavily 联网搜索（`node_web_search_mcp`），之后是 RRF 融合（`node_rrf`）和百炼 `qwen3-rerank` 重排加断崖截断（`node_rerank`）。真实验证的范围与限制见各节验收记录，最近的记录为[第 14 节验收](docs/memory/day14-acceptance.md)。
+学习代码位于 [src/shopkeeper_brain](src/shopkeeper_brain/)，包括入口路由、PDF 转 Markdown、图片摘要与 MinIO 替换、文档切片、主体识别、BGE-M3 名称和切片双向量化，Milvus 主体名称与 Chunk 入库，以及查询流程骨架、MongoDB 会话历史和产品名称确认。产品确认后的三路检索：正文向量检索（`node_search_embedding`）、HyDE 假设性文档检索（`node_search_embedding_hyde`）和 Tavily 联网搜索（`node_web_search_mcp`），之后是 RRF 融合（`node_rrf`）和百炼 `qwen3-rerank` 重排加断崖截断（`node_rerank`）。真实验证的范围与限制见[第 15 节验收](docs/memory/day15-acceptance.md)及此前记录。
 
-当前主要通过各节点文件中的学习期 `__main__` 在 IDE 中运行。最近的真实入库入口为 [node_import_milvus.py](src/shopkeeper_brain/processor/import_processor/nodes/node_import_milvus.py)，先保存主体名称，再批量保存 Chunk 并回填主键。[main_graph.py](src/shopkeeper_brain/processor/import_processor/main_graph.py) 仍只提供入口后的路由函数；声明的命令行入口仍是脚手架问候，正式导入主图和业务 Web 接口按学习进度逐节接入。查询流程在 [query_processor](src/shopkeeper_brain/processor/query_processor/)：主图已接好路由，产品确认（运行入口 [node_item_name_confirm.py](src/shopkeeper_brain/processor/query_processor/nodes/node_item_name_confirm.py)）和三路检索（入口 [node_search_embedding.py](src/shopkeeper_brain/processor/query_processor/nodes/node_search_embedding.py)、[node_search_embedding_hyde.py](src/shopkeeper_brain/processor/query_processor/nodes/node_search_embedding_hyde.py)、[node_web_search_mcp.py](src/shopkeeper_brain/processor/query_processor/nodes/node_web_search_mcp.py)）有真实逻辑，融合与重排（入口 [node_rrf.py](src/shopkeeper_brain/processor/query_processor/nodes/node_rrf.py)、[node_rerank.py](src/shopkeeper_brain/processor/query_processor/nodes/node_rerank.py)）也已实现，只剩答案输出节点是占位。MongoDB 使用虚拟机服务，联网搜索使用 Tavily 远程 MCP，重排使用阿里云百炼，连接配置见 [.env.example](.env.example)（Tavily 地址可留空，Tavily 和百炼的密钥只填本地 `.env`），运行方法见 [第 9 节教程](docs/study/day09-检索流程骨架与产品确认.md)、[第 11 节教程](docs/study/day11-HyDE与网络搜索.md)、[第 12 节教程](docs/study/day12-RRF融合与Rerank重排.md)。
+[导入主图](src/shopkeeper_brain/processor/import_processor/main_graph.py)已接通 PDF／Markdown 分支和入库节点。[查询主图](src/shopkeeper_brain/processor/query_processor/main_graph.py)已经接通检索和重排，生成式答案仍未实现。各节点的学习期 `__main__` 保留用于单独运行；命令行入口仍是脚手架问候。MongoDB 使用虚拟机服务，联网搜索使用 Tavily 远程 MCP，重排使用阿里云百炼，连接配置见 [.env.example](.env.example)；密钥只填本地 `.env`。
 
 在 PyCharm 直接运行 Web 入口的 `__main__`，访问 `http://127.0.0.1:8000/`。点击「检查服务」会向同源的 `GET /health` 发请求，页面显示 `{"ok":true}`，表示 HTTP 服务可以响应。详见 [Web 入口](src/shopkeeper_brain/api/main.py) 和 [第 13 节教程](docs/study/day13-Web服务骨架.md)。
+
+从首页点「导入手册」上传文件，页面按任务 ID 轮询直到成功或失败；上传和切片产物写入 `workspace/day15-uploads/`。点「查询手册」提交问题，可用 SSE 看到节点进度和重排条数，刷新后可读回会话历史。先按[第 15 节教程](docs/study/day15-API前端与流式交互.md)配置实验集合和 MongoDB 实验库，再跑上传和查询；已实测 Markdown 整链，PDF Web 整链未运行。
 
 在同一服务下打开 `/docs`，可用 `POST /demo/preview` 练习 JSON 校验。访问 `/demo/sse` 并点击「开始接收」，浏览器会逐条显示服务端发来的进度，收到 `complete` 后关闭连接。操作与判据见[第 14 节教程](docs/study/day14-FastAPI与SSE.md)。
 
@@ -53,4 +55,4 @@ BGE-M3 的实际路线是 CPU/FP32，模型准备和配置见 [第 7 节教程](
 
 稀疏向量在内存中使用整数特征编号，JSON 对象键会变成字符串；读取备份后需恢复整数键。Dense 为 1024 维并做 L2 归一化，Sparse 保留模型原权重，不能照搬 Dense 的单位范数要求。
 
-Milvus 两类数据的真实入库、索引、重复导入和主键回填已在第 8 节验收；第 9 节已验收产品名称确认（只查 `kb_item_names`），第 10 节已验收带商品过滤的正文向量检索（查 `kb_chunks`），第 11 节已验收 HyDE 与 Tavily 联网搜索，第 12 节已验收 RRF 融合与百炼重排；答案输出和 Web 交互等能力仍按学习进度推进，不能把入库、检索或重排通过当作查询链路已经就绪。
+Milvus 两类数据的真实入库、索引、重复导入和主键回填已在第 8 节验收；第 9 节已验收产品名称确认（只查 `kb_item_names`），第 10 节已验收带商品过滤的正文向量检索（查 `kb_chunks`），第 11 节已验收 HyDE 与 Tavily 联网搜索，第 12 节已验收 RRF 融合与百炼重排；第 15 节已验收 Web 导入、查询进度与会话历史。重排成功不等于已生成答案，答案输出留到第 16 节。
