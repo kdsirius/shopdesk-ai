@@ -39,72 +39,43 @@ class NodeMdImg(BaseNode):
         md_content, md_path, images_dir = self._step_1_get_content(state)
         if not images_dir.is_dir():
             self.logger.info("图片目录不存在，跳过图片处理：%s", images_dir)
+            state["md_content"] = md_content
             return state
 
         target_images = self._step_2_scan_images(md_content, images_dir)
         if not target_images:
             self.logger.info("没有找到被 Markdown 引用的支持格式图片")
+            state["md_content"] = md_content
             return state
 
-        summaries = self._step_3_generate_summaries(
-            md_path.stem,
-            target_images,
-        )
-
-        new_md_content = self._step_4_upload_and_replace(
-            md_path.stem,
-            target_images,
-            summaries,
-            md_content,
-        )
-
-        new_md_path = self._step_5_backup_new_md_file(
-            md_path,
-            new_md_content,
-        )
+        summaries = self._step_3_generate_summaries(md_path.stem, target_images, )
+        new_md_content = self._step_4_upload_and_replace(md_path.stem, target_images, summaries, md_content, )
+        new_md_path = self._step_5_backup_new_md_file(md_path, new_md_content, )
 
         # 只有新文件写入成功后，才让下游看到新的状态。
         state["md_path"] = str(new_md_path)
         state["md_content"] = new_md_content
         return state
 
-    def _step_1_get_content(
-            self,
-            state: ImportGraphState,
-    ) -> tuple[str, Path, Path]:
+    def _step_1_get_content(self, state: ImportGraphState, ) -> tuple[str, Path, Path]:
         """取得 Markdown 正文、文件路径和同级图片目录。"""
         md_path_value = state.get("md_path")
         if not isinstance(md_path_value, str) or not md_path_value.strip():
-            raise StateFieldError(
-                node_name=self.name,
-                field_name="md_path",
-                expected_type=str,
-            )
+            raise StateFieldError(node_name=self.name, field_name="md_path", expected_type=str, )
 
         md_path = Path(md_path_value).resolve()
         if not md_path.is_file():
-            raise FileProcessingError(
-                message=f"Markdown 文件不存在或不是普通文件：{md_path}",
-                node_name=self.name,
-            )
+            raise FileProcessingError(message=f"Markdown 文件不存在或不是普通文件：{md_path}", node_name=self.name, )
 
         md_content = state.get('md_content', "")
         if not isinstance(md_content, str):
-            raise StateFieldError(
-                node_name=self.name,
-                field_name="md_content",
-                expected_type=str,
-            )
+            raise StateFieldError(node_name=self.name, field_name="md_content", expected_type=str, )
         if not md_content:
             md_content = md_path.read_text(encoding='utf-8')
 
         return md_content, md_path, md_path.parent / "images"
 
-    def _step_2_scan_images(
-            self,
-            md_content: str,
-            images_dir: Path,
-    ) -> list[ImageTarget]:
+    def _step_2_scan_images(self, md_content: str, images_dir: Path, ) -> list[ImageTarget]:
         """筛选支持格式且确实被 Markdown 引用的图片。"""
         target_images: list[ImageTarget] = []
 
@@ -123,12 +94,7 @@ class NodeMdImg(BaseNode):
         self.logger.info("筛选出 %s 张待处理图片", len(target_images))
         return target_images
 
-    def _find_image_in_md(
-            self,
-            md_content: str,
-            image_file: str,
-            context_len: int = 100,
-    ) -> tuple[str, str] | None:
+    def _find_image_in_md(self, md_content: str, image_file: str, context_len: int = 100, ) -> tuple[str, str] | None:
         """查找图片标签，并截取标签前后各一段文本。"""
         pattern = re.compile(
             r"!\[.*?]\(.*?"
@@ -144,11 +110,7 @@ class NodeMdImg(BaseNode):
         after = md_content[end: min(len(md_content), end + context_len)]
         return before, after
 
-    def _step_3_generate_summaries(
-            self,
-            doc_stem: str,
-            target_images: list[ImageTarget],
-    ) -> dict[str, str]:
+    def _step_3_generate_summaries(self, doc_stem: str, target_images: list[ImageTarget], ) -> dict[str, str]:
         """按限流规则调用 VL 模型，返回图片摘要映射。"""
         config = load_image_config()
         if not config.base_url:
@@ -182,12 +144,7 @@ class NodeMdImg(BaseNode):
             )
         return summaries
 
-    def _apply_api_rate_limit(
-            self,
-            request_times: Deque[float],
-            max_requests: int,
-            window_seconds: int,
-    ) -> None:
+    def _apply_api_rate_limit(self, request_times: Deque[float], max_requests: int, window_seconds: int,) -> None:
         """用滑动时间窗口限制 VL 请求频率。"""
         if max_requests <= 0 or window_seconds <= 0:
             raise ValueError("图片摘要限流参数必须是正数")

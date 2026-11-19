@@ -83,6 +83,10 @@ class KBQueryWorkflow:
         """同步执行整张图，返回最终状态。"""
         return self.compile().invoke(initial_state)
 
+    def stream(self, initial_state: QueryGraphState):
+        """给后台任务逐节点读取状态更新。"""
+        return self.compile().stream(initial_state, stream_mode="updates", version="v2")
+
 
 if __name__ == "__main__":
     logging.basicConfig(

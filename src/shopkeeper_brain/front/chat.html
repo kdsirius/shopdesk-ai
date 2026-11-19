@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>掌柜智库 · 查询手册</title>
+</head>
+<body>
+    <nav><a href="/">状态页</a> · <a href="/import.html">导入手册</a></nav>
+    <h1>查询手册</h1>
+    <form id="query-form">
+        <label>问题 <input id="question" size="42" required></label>
+        <button type="submit">发送</button>
+    </form>
+    <pre id="query-progress" aria-live="polite">等待提问</pre>
+    <h2>会话历史</h2>
+    <ol id="history"></ol>
+    <p id="history-note" aria-live="polite"></p>
+    <script>
+        const form = document.getElementById("query-form");
+        const button = form.querySelector("button");
+        const question = document.getElementById("question");
+        const progress = document.getElementById("query-progress");
+        const history = document.getElementById("history");
+        const historyNote = document.getElementById("history-note");
+        const sessionId = sessionStorage.getItem("shopkeeper-session") || crypto.randomUUID();
+        sessionStorage.setItem("shopkeeper-session", sessionId);
+
+        async function loadHistory() {
+            try {
+                const response = await fetch(`/history/${sessionId}`);
+                if (!response.ok) throw new Error(`历史 HTTP ${response.status}`);
+                const { items } = await response.json();
+                history.replaceChildren(...items.map(item => {
+                    const line = document.createElement("li");
+                    line.textContent = `${item.role === "user" ? "我" : "助手"}：${item.text}`;
+                    return line;
+                }));
+                historyNote.textContent = items.length ? "" : "当前会话暂无记录。";
+            } catch (error) {
+                historyNote.textContent = `读取历史失败：${error.message}`;
+            }
+        }
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const text = question.value.trim();
+            if (!text) return;
+            button.disabled = true;
+            progress.textContent = "正在提交…\n";
+            try {
+                const response = await fetch("/query", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query: text, session_id: sessionId }),
+                });
+                if (!response.ok) throw new Error(`查询 HTTP ${response.status}`);
+                const { run_id } = await response.json();
+                const source = new EventSource(`/stream/${run_id}`);
+                async function finish(message) {
+                    source.close();
+                    progress.textContent += message;
+                    await loadHistory();
+                    button.disabled = false;
+                }
+                source.addEventListener("progress", (event) => {
+                    progress.textContent += `${JSON.parse(event.data).node}\n`;
+                });
+                source.addEventListener("complete", (event) => {
+                    const { reranked_count } = JSON.parse(event.data);
+                    const detail = reranked_count === null ? "未进入检索分支" : `重排保留 ${reranked_count} 条资料`;
+                    finish(`查询完成，${detail}。`);
+                });
+                source.addEventListener("task_error", (event) => finish(JSON.parse(event.data).message));
+                source.onerror = () => finish("进度连接中断。");
+            } catch (error) {
+                progress.textContent += error.message;
+                button.disabled = false;
+            }
+        });
+        loadHistory();
+    </script>
+</body>
+</html>

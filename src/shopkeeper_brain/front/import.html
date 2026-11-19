@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>掌柜智库 · 导入手册</title>
+</head>
+<body>
+    <nav><a href="/">状态页</a> · <a href="/chat.html">查询手册</a></nav>
+    <h1>导入手册</h1>
+    <form id="upload-form">
+        <label>手册 <input name="file" type="file" accept=".md,.pdf" required></label>
+        <button type="submit">上传</button>
+    </form>
+    <pre id="import-result" aria-live="polite">等待上传</pre>
+    <script>
+        const form = document.getElementById("upload-form");
+        const button = form.querySelector("button");
+        const result = document.getElementById("import-result");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            button.disabled = true;
+            result.textContent = "正在上传…";
+            try {
+                const upload = await fetch("/upload", { method: "POST", body: new FormData(form) });
+                if (!upload.ok) throw new Error(`上传 HTTP ${upload.status}`);
+                const { task_id } = await upload.json();
+                while (true) {
+                    const response = await fetch(`/status/${task_id}`);
+                    if (!response.ok) throw new Error(`状态 HTTP ${response.status}`);
+                    const { status, done_list } = await response.json();
+                    result.textContent = [task_id, status, ...done_list].join("\n");
+                    if (status === "completed" || status === "failed") break;
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+            } catch (error) {
+                result.textContent = error.message;
+            } finally {
+                button.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

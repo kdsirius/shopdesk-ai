@@ -1,11 +1,8 @@
-from abc import ABC, abstractmethod
 import logging
-from typing import TypeVar
+from abc import ABC, abstractmethod
 
 from .exceptions import ImportProcessError
 from .state import ImportGraphState
-
-StateT = TypeVar('StateT', bound=ImportGraphState)
 
 
 class BaseNode(ABC):
@@ -17,7 +14,7 @@ class BaseNode(ABC):
             raise ValueError("子类必须覆盖 name")
         self.logger = logging.getLogger(f"import.{self.name}")
 
-    def __call__(self, state: StateT) -> StateT:
+    def __call__(self, state: ImportGraphState) -> ImportGraphState:
         """让节点实例可以被 LangGraph 当作函数调用。"""
         self.logger.info("%s 开始", self.name)
         try:
