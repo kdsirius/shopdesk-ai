@@ -1,4 +1,5 @@
 import logging
+from uuid import uuid4
 
 from langgraph.constants import END
 from langgraph.graph import StateGraph
@@ -84,27 +85,23 @@ class KBQueryWorkflow:
         return self.compile().invoke(initial_state)
 
     def stream(self, initial_state: QueryGraphState):
-        """给后台任务逐节点读取状态更新。"""
-        return self.compile().stream(initial_state, stream_mode="updates", version="v2")
+        """给后台任务读取完成节点的更新和生成中的文本增量。"""
+        return self.compile().stream(initial_state, stream_mode=["updates", "custom"], version="v2")
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(levelname)s %(name)s %(message)s",
-    )
-
-    # 每个问题用独立会话，互不影响；第一个走拒答分支，第二个走确认分支。
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
+    session_id = str(uuid4())
     cases = [
-        ("day09-graph-reject", "iPhone 15 怎么充电？"),
-        ("day09-graph-confirm", "RS PRO RS-12 数字万用表怎么测电压？"),
+        (session_id, "RS-12 怎么测电压？"),
+        (session_id, "是 RS PRO RS-12 数字万用表，怎么测交流电压？"),
+        (str(uuid4()), "iPhone 15 怎么充电？"),
     ]
-
     workflow = KBQueryWorkflow()
-    for session_id, query in cases:
-        clear_history(session_id)
-        final_state = workflow.run({"session_id": session_id, "original_query": query})
-        print("问题：", query)
-        print("确认商品：", final_state["item_names"])
-        print("直接回答：", final_state["answer"] or "（空：已经过三路占位检索）")
-        print("-" * 30)
+    for current_session, query in cases:
+        final_state = workflow.run({"session_id": current_session, "original_query": query})
+        print("会话", current_session, "问题", query)
+        print("确认商品", final_state["item_names"])
+        print(final_state["answer"])
+        print("重排条数", len(final_state.get("reranked_docs") or []))
+        print("配图", final_state["image_urls"])

@@ -12,6 +12,9 @@
         <button type="submit">发送</button>
     </form>
     <pre id="query-progress" aria-live="polite">等待提问</pre>
+    <h2>本轮回答</h2>
+    <pre id="answer" style="white-space: pre-wrap;"></pre>
+    <div id="answer-images"></div>
     <h2>会话历史</h2>
     <ol id="history"></ol>
     <p id="history-note" aria-live="polite"></p>
@@ -20,10 +23,22 @@
         const button = form.querySelector("button");
         const question = document.getElementById("question");
         const progress = document.getElementById("query-progress");
+        const answer = document.getElementById("answer");
+        const answerImages = document.getElementById("answer-images");
         const history = document.getElementById("history");
         const historyNote = document.getElementById("history-note");
         const sessionId = sessionStorage.getItem("shopkeeper-session") || crypto.randomUUID();
         sessionStorage.setItem("shopkeeper-session", sessionId);
+
+        function renderImages(container, urls) {
+            container.replaceChildren(...(urls ?? []).map(url => {
+                const image = document.createElement("img");
+                image.src = url;
+                image.alt = "参考图片";
+                image.style.maxWidth = "min(100%, 360px)";
+                return image;
+            }));
+        }
 
         async function loadHistory() {
             try {
@@ -33,6 +48,9 @@
                 history.replaceChildren(...items.map(item => {
                     const line = document.createElement("li");
                     line.textContent = `${item.role === "user" ? "我" : "助手"}：${item.text}`;
+                    const images = document.createElement("div");
+                    renderImages(images, item.image_urls);
+                    line.append(images);
                     return line;
                 }));
                 historyNote.textContent = items.length ? "" : "当前会话暂无记录。";
@@ -46,6 +64,8 @@
             const text = question.value.trim();
             if (!text) return;
             button.disabled = true;
+            answer.textContent = "";
+            answerImages.replaceChildren();
             progress.textContent = "正在提交…\n";
             try {
                 const response = await fetch("/query", {
@@ -65,13 +85,26 @@
                 source.addEventListener("progress", (event) => {
                     progress.textContent += `${JSON.parse(event.data).node}\n`;
                 });
+                source.addEventListener("delta", (event) => {
+                    answer.textContent += JSON.parse(event.data).delta;
+                });
                 source.addEventListener("complete", (event) => {
-                    const { reranked_count } = JSON.parse(event.data);
-                    const detail = reranked_count === null ? "未进入检索分支" : `重排保留 ${reranked_count} 条资料`;
+                    const result = JSON.parse(event.data);
+                    answer.textContent = result.answer;
+                    renderImages(answerImages, result.image_urls);
+                    const detail = result.reranked_count === null
+                        ? "未进入检索分支"
+                        : `重排保留 ${result.reranked_count} 条资料`;
                     finish(`查询完成，${detail}。`);
                 });
-                source.addEventListener("task_error", (event) => finish(JSON.parse(event.data).message));
-                source.onerror = () => finish("进度连接中断。");
+                source.addEventListener("task_error", (event) => {
+                    answer.textContent = "";
+                    finish(JSON.parse(event.data).message);
+                });
+                source.onerror = () => {
+                    answer.textContent = "";
+                    finish("进度连接中断。");
+                };
             } catch (error) {
                 progress.textContent += error.message;
                 button.disabled = false;

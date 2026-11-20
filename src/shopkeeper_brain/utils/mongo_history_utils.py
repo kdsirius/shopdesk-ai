@@ -40,6 +40,7 @@ def save_chat_message(
         rewritten_query: str = "",
         item_names: list[str] | None = None,
         message_id: str | None = None,
+        image_urls: list[str] | None = None,
 ) -> str:
     """没有 message_id 时新增一条消息，有 message_id 时更新这条消息；返回消息主键字符串。"""
     collection = get_chat_message_collection()
@@ -50,6 +51,8 @@ def save_chat_message(
         "rewritten_query": rewritten_query or "",
         "item_names": item_names or [],
     }
+    if image_urls is not None:
+        document["image_urls"] = image_urls
     if message_id:
         # 更新只改内容，不动 ts：消息的先后顺序以第一次写入的时间为准。
         collection.update_one({"_id": ObjectId(message_id)}, {"$set": document})

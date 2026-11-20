@@ -35,7 +35,7 @@
 | 13 | Web 服务骨架 | 已通过 | 2026-11-18 | 无自动化测试 | 用户浏览器自测及真实源码隔离 HTTP 验收通过，代码和文档已提交（`e3ff008`）。资料对应 day13 的 HTML/CSS/JavaScript 入门与 day14 的服务启动部分，详见 [验收记录](day13-acceptance.md)、[备课记录](day13-preparation.md) |
 | 14 | FastAPI 与 SSE | 已通过 | 2026-11-18 | 无自动化测试 | 用户已自测。实际源码的健康检查、输入校验、逐条收流和完成后关闭均通过，提交为 `62636d8`。见[验收记录](day14-acceptance.md)、[备课记录](day14-preparation.md) |
 | 15 | API、前端与流式交互 | 已通过 | 2026-11-19 | 无自动化测试 | 用户完成真实 Markdown 导入和两查询分支自测；用户实际源码隔离检查通过，补齐首页导航后定向复验通过，提交为 `1404667`。见[验收记录](day15-acceptance.md)和[备课记录](day15-preparation.md) |
-| 16 | 答案输出与项目收敛 | 未开始 |  |  | 对应 day16 |
+| 16 | 答案输出与项目收敛 | 编写中 |  | 无自动化测试 | [教程](../study/day16-答案输出与项目收敛.md)已交付，隔离副本通过同步、浏览器 SSE 与 MongoDB 联调，待用户手敲和自测。见[备课记录](day16-preparation.md) |
 
 ## 历史验收与资料记录
 
@@ -100,7 +100,6 @@
 | --- | --- | --- |
 | 答案输出与页面展示 | 16 | `node_answer_output` 原样透传状态；查询页只展示进度、重排条数和已有历史，尚无生成式答案 |
 | PDF Web 导入整链 | 11、15 | 第 15 节已补齐导入主图并验证真实 Markdown 到 Milvus；浏览器上传 PDF 经 MinerU、图片处理到入库的整条链路未运行 |
-| 第 16 节资料范围 | 16 | 按视频目录图片、课堂笔记和代码、补充笔记的顺序核对，再确认最后一节的落地范围 |
 | 第 3 节 MinerU 异常边界 | 03 | 已验证一个真实 PDF 的成功链路；长时间超时、网络中断、损坏 ZIP、缺少 full.md 和更多加密 PDF 兼容性未单独验证 |
 | 第 3 节 Python 3.11 真实外部链路 | 03 | 第 3 节当时的完整 MinerU 隔离运行使用 3.12.9；后续 3.11.15 的编译与 BGE 验证不等于在 3.11 重新请求 MinerU |
 
@@ -110,7 +109,7 @@
 
 - 先执行只读 `git status --short` 和 `git log -5 --oneline`，保留已有改动。读取根、文档区和参考区规则、README、项目概览、教学偏好、本进度及[第 15 节验收记录](day15-acceptance.md)、[备课记录](day15-preparation.md)。固定教学样例仍是第 6 节。所有工作在当前会话完成。
 - 第 15 节基线为 `1404667`。核对真实[答案节点](../../src/shopkeeper_brain/processor/query_processor/nodes/node_answer_output.py)、[查询主图](../../src/shopkeeper_brain/processor/query_processor/main_graph.py)、[查询服务](../../src/shopkeeper_brain/services/query_service.py)、[业务 API](../../src/shopkeeper_brain/api/business.py)、[查询页](../../src/shopkeeper_brain/front/chat.html)和 [MongoDB 历史工具](../../src/shopkeeper_brain/utils/mongo_history_utils.py)。`session_id` 用于历史，`run_id` 用于一次性 SSE 订阅；业务流有 `progress`、`complete` 和 `task_error`。当前真实历史接口返回最近 5 条，不能把教程示例的 50 当成已实现。
-- 第 16 节先看 day16 两张视频目录图，再读当天答案流程笔记和代码，最后对照[补充笔记 20「答案输出」](../../reference/掌教智库/1.笔记/20【掌柜智库】【检索】【节点7】答案输出.md)。核对已有追问和拒答如何透传、确认分支如何使用重排资料、答案流和助手历史如何接到现有页面与 API，再确认端到端验证范围。先简述范围和判据，等用户确认后再写教程。
+- 第 16 节已按资料优先级摸底并经用户确认范围，[教程](../study/day16-答案输出与项目收敛.md)和[备课实测](day16-preparation.md)已交付。用户按教程手敲并自测后，再读取实际改动、复制实际源码到隔离副本，验收同步节点、追问和拒答、SSE 正文与 MongoDB 历史，不用教程副本结果代替用户源码结果。
 - 第 12 节结果：`node_rrf` 返回 `rrf_chunks`（`entity` 字典列表，含 `chunk_id`、`content`、`item_name`，不含分数），`node_rerank` 返回 `reranked_docs`（元素 `{content, title, chunk_id, url, source, score}`，`source` 为 `local` 或 `web`，3 到 10 条；重排失败降级时只含本地结果且 `score` 为 `None`）。答案输出节点要读取 `reranked_docs`，并同时处理 `score` 为 `None` 和联网结果有 `url` 的情况。重排依赖 `dashscope`，配置变量 `SHOPKEEPER_BRAIN_RERANK_*`，密钥只在本地 `.env`。
 - 第 11 节结果：`node_search_embedding_hyde` 返回 `hyde_embedding_chunks`，`node_web_search_mcp` 返回 `web_search_docs`（元素是 `{title, url, snippet}`，`snippet` 已截断到 500 字，来自 Tavily 的 `content`）；两路运行期故障返回空列表，所以后面的 RRF 和 Rerank 必须能处理这两个字段为空的情况。向量检索与 HyDE 的元素保持 PyMilvus 原形状（`chunk_id`、`distance`、`entity`）。联网搜索的相关性有浮动，会混入无关页面，交给重排处理。Tavily 密钥只在本地 `.env`，依赖已新增 `mcp`；`mcp 2.3.0` 的客户端接口是新版（`Client`、`is_error`、`httpx2`），与网上多数 1.x 示例不同。
 - 第 9 节结果：查询骨架在 `processor/query_processor/`（`main_graph.py` 在该目录，节点在 `nodes/`），导入包已由用户改名为 `import_processor`，后续教程和验收以真实包名为准。产品确认只查 `kb_item_names`，第 10 节才检索 `kb_chunks` 正文；三个并行检索节点只返回各自字段；正文检索从第 10 节起支持商品过滤。

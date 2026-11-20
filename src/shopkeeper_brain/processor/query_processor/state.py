@@ -24,4 +24,5 @@ class QueryGraphState(TypedDict, total=False):
     reranked_docs: list[dict[str, object]]
     prompt: str
     answer: str
+    image_urls: list[str]
     is_stream: bool
