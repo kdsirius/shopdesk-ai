@@ -5,7 +5,7 @@ from numbers import Real
 from pymilvus import MilvusClient, AnnSearchRequest, WeightedRanker
 
 from app.core.milvus_config import load_milvus_config
-from app.processor.import_processor.exceptions import ConfigurationError, ValidationError
+from app.core.exceptions import ConfigurationError, ValidationError
 
 _milvus_client: MilvusClient | None = None
 

@@ -7,7 +7,7 @@ from pymongo import MongoClient, DESCENDING
 from pymongo.collection import Collection
 
 from app.core.mongo_config import load_mongo_config
-from app.processor.import_processor.exceptions import ConfigurationError
+from app.core.exceptions import ConfigurationError
 
 logger = logging.getLogger(__name__)
 

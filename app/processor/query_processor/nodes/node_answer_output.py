@@ -4,7 +4,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.config import get_stream_writer
 
 from app.core.llm_config import load_llm_config
-from app.processor.import_processor.exceptions import ConfigurationError
+from app.core.exceptions import ConfigurationError
 from app.processor.query_processor.base import NodeBase
 from app.processor.query_processor.state import QueryGraphState
 from app.utils.mongo_history_utils import save_chat_message

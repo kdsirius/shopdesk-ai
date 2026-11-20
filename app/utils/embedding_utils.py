@@ -1,7 +1,7 @@
 from pymilvus.model.hybrid import BGEM3EmbeddingFunction
 
 from app.core.embedding_config import load_embedding_config
-from app.processor.import_processor.exceptions import ConfigurationError
+from app.core.exceptions import ConfigurationError
 
 _bge_m3_ef: BGEM3EmbeddingFunction | None = None
 

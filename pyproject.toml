@@ -29,7 +29,7 @@ dependencies = [
 ]
 
 [project.scripts]
-shopdesk-ai = "app:main"
+shopdesk-ai = "app:cli_main"
 
 [tool.uv.build-backend]
 module-name = "app"

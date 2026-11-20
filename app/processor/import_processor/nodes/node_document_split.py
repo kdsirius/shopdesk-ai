@@ -6,8 +6,8 @@ from typing import Any
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from app.processor.import_processor.BaseNode import BaseNode
-from app.processor.import_processor.exceptions import StateFieldError
+from app.core.exceptions import StateFieldError
+from app.processor.import_processor.base import BaseNode
 from app.processor.import_processor.state import ImportGraphState, create_default_state
 
 Chunk = dict[str, Any]

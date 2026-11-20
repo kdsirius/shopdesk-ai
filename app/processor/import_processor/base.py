@@ -1,6 +1,8 @@
 import logging
 from abc import ABC, abstractmethod
 
+from app.core.exceptions import ProcessingError
+
 from .exceptions import ImportProcessError
 from .state import ImportGraphState
 
@@ -19,7 +21,7 @@ class BaseNode(ABC):
         self.logger.info("%s 开始", self.name)
         try:
             result = self.process(state)
-        except ImportProcessError:
+        except ProcessingError:
             raise
         except Exception as exc:
             raise ImportProcessError(

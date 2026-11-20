@@ -6,11 +6,11 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_openai import ChatOpenAI
 from pymilvus import MilvusClient, DataType
 
+from app.core.exceptions import ConfigurationError, ProcessingError, StateFieldError, ValidationError
 from app.core.llm_config import load_llm_config
 from app.core.milvus_config import load_milvus_config
-from app.processor.import_processor.BaseNode import BaseNode
-from app.processor.import_processor.exceptions import StateFieldError, ConfigurationError, ValidationError, \
-    ImportProcessError, MilvusError
+from app.processor.import_processor.base import BaseNode
+from app.processor.import_processor.exceptions import MilvusError
 from app.processor.import_processor.state import ImportGraphState, create_default_state
 from app.utils.embedding_utils import generate_embeddings
 from app.utils.milvus_utils import (
@@ -165,7 +165,7 @@ class NodeItemNameRecognition(BaseNode):
                     "sparse_vector": restored_sparse
                 }]
             )
-        except ImportProcessError:
+        except ProcessingError:
             raise
         except Exception as exc:
             raise MilvusError(message="主体名称写入 Milvus 失败", node_name=self.name, cause=exc) from exc

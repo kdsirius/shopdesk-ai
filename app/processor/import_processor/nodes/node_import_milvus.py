@@ -5,10 +5,10 @@ from pathlib import Path
 
 from pymilvus import MilvusClient, DataType
 
+from app.core.exceptions import ConfigurationError, ProcessingError, StateFieldError, ValidationError
 from app.core.milvus_config import MilvusConfig, load_milvus_config
-from app.processor.import_processor.BaseNode import BaseNode
-from app.processor.import_processor.exceptions import StateFieldError, ValidationError, ConfigurationError, \
-    ImportProcessError, MilvusError
+from app.processor.import_processor.base import BaseNode
+from app.processor.import_processor.exceptions import MilvusError
 from app.processor.import_processor.nodes.node_item_name_recognition import NodeItemNameRecognition
 from app.processor.import_processor.state import ImportGraphState
 from app.utils.milvus_utils import restore_sparse_vector, get_milvus_client, escape_milvus_string
@@ -102,7 +102,7 @@ class NodeImportMilvus(BaseNode):
             client = get_milvus_client()
             if not client.has_collection(config.chunk_collection):
                 self._create_chunk_collection(client, config.chunk_collection)
-        except ImportProcessError:
+        except ProcessingError:
             raise
         except Exception as exc:
             raise MilvusError(message="Chunk 集合准备失败", node_name=self.name, cause=exc) from exc

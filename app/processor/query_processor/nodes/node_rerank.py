@@ -1,6 +1,6 @@
 import logging
 
-from app.processor.import_processor.exceptions import StateFieldError
+from app.core.exceptions import StateFieldError
 from app.processor.query_processor.base import NodeBase
 from app.processor.query_processor.state import QueryGraphState
 from app.utils.rerank_utils import rerank_documents

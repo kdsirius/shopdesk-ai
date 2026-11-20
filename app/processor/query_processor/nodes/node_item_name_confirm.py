@@ -6,7 +6,7 @@ from langchain_openai import ChatOpenAI
 
 from app.core.llm_config import load_llm_config
 from app.core.milvus_config import load_milvus_config
-from app.processor.import_processor.exceptions import StateFieldError, ConfigurationError
+from app.core.exceptions import StateFieldError, ConfigurationError
 from app.processor.query_processor.base import NodeBase
 from app.processor.query_processor.state import QueryGraphState
 from app.utils.embedding_utils import generate_embeddings

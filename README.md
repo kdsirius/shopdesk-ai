@@ -16,7 +16,7 @@
 
 [导入主图](app/processor/import_processor/main_graph.py)已接通 PDF／Markdown 分支和入库节点。[查询主图](app/processor/query_processor/main_graph.py)会直接返回已有追问或拒答；确认产品后，用重排资料和近期会话生成答案。各节点的学习期 `__main__` 保留用于单独运行；命令行入口仍是脚手架问候。MongoDB 使用虚拟机服务，联网搜索使用 Tavily 远程 MCP，重排使用阿里云百炼，连接配置见 [.env.example](.env.example)；密钥只填本地 `.env`。
 
-在仓库根目录运行 `uv run uvicorn app.api.main:app`，或在 PyCharm 以模块 `app.api.main` 启动，工作目录设为仓库根目录。访问 `http://127.0.0.1:8000/`，点击「检查服务」，页面显示 `{"ok":true}`，表示 HTTP 服务可以响应。详见 [Web 入口](app/api/main.py)。
+在仓库根目录运行 `uv run uvicorn app.main:app`，或在 PyCharm 以模块 `app.main` 启动，工作目录设为仓库根目录。访问 `http://127.0.0.1:8000/`，点击「检查服务」，页面显示 `{"ok":true}`，表示 HTTP 服务可以响应。详见 [Web 入口](app/main.py)。
 
 从首页点「导入手册」上传文件，页面按任务 ID 轮询直到成功或失败；上传和切片产物写入 `workspace/day15-uploads/`。点「查询手册」提交问题，页面用 SSE 显示节点进度和流式正文，完成时显示配图与重排条数；刷新后从 MongoDB 读回最近 5 条消息及配图。导入试跑按[第 15 节教程](docs/study/day15-API前端与流式交互.md)配置实验集合，查询试跑按[第 16 节教程](docs/study/day16-答案输出与项目收敛.md)复用已入库的真实手册并使用独立历史库。已实测 Markdown 导入和手册问答，PDF Web 整链未运行。
 

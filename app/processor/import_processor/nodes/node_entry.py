@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from app.processor.import_processor.BaseNode import BaseNode
-from app.processor.import_processor.exceptions import StateFieldError, ValidationError
+from app.core.exceptions import StateFieldError, ValidationError
+from app.processor.import_processor.base import BaseNode
 from app.processor.import_processor.state import ImportGraphState
 
 

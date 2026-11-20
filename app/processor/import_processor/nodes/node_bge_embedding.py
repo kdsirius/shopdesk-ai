@@ -4,8 +4,8 @@ import math
 from copy import deepcopy
 from pathlib import Path
 
-from app.processor.import_processor.BaseNode import BaseNode
-from app.processor.import_processor.exceptions import StateFieldError
+from app.core.exceptions import StateFieldError
+from app.processor.import_processor.base import BaseNode
 from app.processor.import_processor.state import ImportGraphState, create_default_state
 
 from app.utils.embedding_utils import generate_embeddings

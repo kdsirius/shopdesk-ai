@@ -7,7 +7,7 @@ from mcp import Client
 from mcp.client.streamable_http import streamable_http_client
 
 from app.core.tavily_config import load_tavily_config
-from app.processor.import_processor.exceptions import StateFieldError, ConfigurationError
+from app.core.exceptions import StateFieldError, ConfigurationError
 from app.processor.query_processor.base import NodeBase
 from app.processor.query_processor.state import QueryGraphState
 

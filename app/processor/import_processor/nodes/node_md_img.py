@@ -12,14 +12,11 @@ from langchain_openai import ChatOpenAI
 from minio import Minio
 from minio.deleteobjects import DeleteObject
 
+from app.core.exceptions import ConfigurationError, StateFieldError
 from app.core.image_config import load_image_config
 from app.core.minio_config import load_minio_config
-from app.processor.import_processor.BaseNode import BaseNode
-from app.processor.import_processor.exceptions import (
-    ConfigurationError,
-    FileProcessingError,
-    StateFieldError,
-)
+from app.processor.import_processor.base import BaseNode
+from app.processor.import_processor.exceptions import FileProcessingError
 from app.processor.import_processor.state import (
     ImportGraphState, create_default_state,
 )

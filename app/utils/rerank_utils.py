@@ -3,7 +3,7 @@ from http import HTTPStatus
 import dashscope
 
 from app.core.rerank_config import load_rerank_config
-from app.processor.import_processor.exceptions import ConfigurationError
+from app.core.exceptions import ConfigurationError
 
 
 def rerank_documents(query: str, documents: list[str]) -> list[float]:
