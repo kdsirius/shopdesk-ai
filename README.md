@@ -1,12 +1,18 @@
-# shopkeeper-brain · 掌柜智库
+# ShopDesk AI（商答台）
 
-面向产品手册和技术文档的 RAG 项目带练重建。以只读参考资料为依据，由用户手敲学习代码，AI 负责教程、审阅、隔离验收和文档维护。
+面向电商客服场景的商品知识问答助手。用户可以上传商品手册，系统在确认商品型号后检索资料，流式给出回答和相关配图。
 
-16 节带练范围已通过验收。章节状态、提交基线和未验证项统一查看 [学习进度](docs/memory/learning-progress.md)。业务全景与实现边界见 [项目概览](docs/memory/project-overview.md)，协作规则见 [AGENTS.md](AGENTS.md)。
+## 当前能力
 
-## 现有实现与运行入口
+- **手册入库**：支持 Markdown 和 PDF 导入，处理图片、切分正文、识别商品并写入 Milvus。Web 端已实测 Markdown 导入整链，PDF Web 整链未运行。
+- **多轮商品问答**：型号不明确时追问，找不到相关商品时说明无法确认；确认后通过向量检索、HyDE 和联网搜索找资料，再融合、重排、生成答案。
+- **流式展示与回显**：页面通过 SSE 展示查询进度及正文，完成后显示配图；刷新后可从 MongoDB 读回历史正文与配图。
 
-学习代码位于 [src/shopkeeper_brain](src/shopkeeper_brain/)，包括入口路由、PDF 转 Markdown、图片摘要与 MinIO 替换、文档切片、主体识别、BGE-M3 名称和切片双向量化，Milvus 主体名称与 Chunk 入库，以及查询流程骨架、MongoDB 会话历史和产品名称确认。产品确认后的三路检索：正文向量检索（`node_search_embedding`）、HyDE 假设性文档检索（`node_search_embedding_hyde`）和 Tavily 联网搜索（`node_web_search_mcp`），之后是 RRF 融合（`node_rrf`）和百炼 `qwen3-rerank` 重排加断崖截断（`node_rerank`）。真实验证的范围与限制见[第 16 节验收](docs/memory/day16-acceptance.md)及此前记录。
+当前聚焦商品知识问答，尚未接入订单查询、退换货办理或人工转接。扩展范围待讨论，见[项目概览](docs/memory/project-overview.md)。
+
+## 运行与演示
+
+源码位于 [src/shopkeeper_brain](src/shopkeeper_brain/)。项目源自「掌柜智库」带练重建，16 节均已验收；[学习进度](docs/memory/learning-progress.md)保留提交基线和未验证项，[第 16 节验收](docs/memory/day16-acceptance.md)记录了真实查询闭环。
 
 [导入主图](src/shopkeeper_brain/processor/import_processor/main_graph.py)已接通 PDF／Markdown 分支和入库节点。[查询主图](src/shopkeeper_brain/processor/query_processor/main_graph.py)会直接返回已有追问或拒答；确认产品后，用重排资料和近期会话生成答案。各节点的学习期 `__main__` 保留用于单独运行；命令行入口仍是脚手架问候。MongoDB 使用虚拟机服务，联网搜索使用 Tavily 远程 MCP，重排使用阿里云百炼，连接配置见 [.env.example](.env.example)；密钥只填本地 `.env`。
 
@@ -43,7 +49,7 @@ BGE-M3 的实际路线是 CPU/FP32，模型准备和配置见 [第 7 节教程](
 | [教学偏好](docs/memory/teaching-preferences.md) | IDE 真实验证、不使用子 agent 等长期约定 |
 | [验收手册](docs/memory/verification-playbook.md) | AI 内部隔离验证与证据记录方式 |
 | [规则与设计](docs/superpowers/) | 已确认设计和执行计划；带日期的文件记录当时决策 |
-| [参考区规则](reference/AGENTS.md) | 原资料只读，按视频目录图片、课堂资料、补充笔记的顺序核对 |
+| [协作规则](AGENTS.md) | 本地参考资料只读，教学、验证和 Git 操作按项目约定执行 |
 
 `workspace/` 是唯一实验区，容纳模型、真实输入与输出、临时副本和验证日志，不作为需要提交的学习源码目录。参考项目的 `app/` 等目录不能替代本工程的实际包路径。
 

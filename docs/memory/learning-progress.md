@@ -107,7 +107,7 @@
 
 ## 项目收敛与后续接手
 
-- 16 节带练范围已验收完成，不再安排下一节。后续接手先只读核对 Git 状态和提交，保留已有改动；从 [README](../../README.md)、[项目概览](project-overview.md)和[第 16 节验收记录](day16-acceptance.md)了解现状，未验证行为以本页欠账为准。
+- 16 节带练范围已验收完成，不再安排新教程。后续按 ShopDesk AI 的电商客服方向讨论扩展，不预设实现方案。接手先只读核对 Git 状态和提交，保留已有改动；从 [README](../../README.md)、[项目概览](project-overview.md)和[第 16 节验收记录](day16-acceptance.md)了解现状，未验证行为以本页欠账为准。
 - 查询闭环的基线为 `e839494`。入口及追踪见[查询主图](../../src/shopkeeper_brain/processor/query_processor/main_graph.py)、[答案节点](../../src/shopkeeper_brain/processor/query_processor/nodes/node_answer_output.py)、[查询服务](../../src/shopkeeper_brain/services/query_service.py)、[业务 API](../../src/shopkeeper_brain/api/business.py)和[查询页](../../src/shopkeeper_brain/front/chat.html)。`run_id` 用于一次性 SSE 订阅，成功流用 `progress`、`delta` 和 `complete`，失败终态为 `task_error`；`session_id` 用于 [MongoDB 历史](../../src/shopkeeper_brain/utils/mongo_history_utils.py)，接口返回最近 5 条，正文与配图一起读回。
 - 第 12 节结果：`node_rrf` 返回 `rrf_chunks`（`entity` 字典列表，含 `chunk_id`、`content`、`item_name`，不含分数），`node_rerank` 返回 `reranked_docs`（元素 `{content, title, chunk_id, url, source, score}`，`source` 为 `local` 或 `web`，3 到 10 条；重排失败降级时只含本地结果且 `score` 为 `None`）。答案输出节点读取 `reranked_docs`，并兼容 `score=None` 与联网结果的 `url`。重排依赖 `dashscope`，配置变量 `SHOPKEEPER_BRAIN_RERANK_*`，密钥只在本地 `.env`。
 - 第 11 节结果：`node_search_embedding_hyde` 返回 `hyde_embedding_chunks`，`node_web_search_mcp` 返回 `web_search_docs`（元素是 `{title, url, snippet}`，`snippet` 已截断到 500 字，来自 Tavily 的 `content`）；两路运行期故障返回空列表，所以后面的 RRF 和 Rerank 必须能处理这两个字段为空的情况。向量检索与 HyDE 的元素保持 PyMilvus 原形状（`chunk_id`、`distance`、`entity`）。联网搜索的相关性有浮动，会混入无关页面，交给重排处理。Tavily 密钥只在本地 `.env`，依赖已新增 `mcp`；`mcp 2.3.0` 的客户端接口是新版（`Client`、`is_error`、`httpx2`），与网上多数 1.x 示例不同。

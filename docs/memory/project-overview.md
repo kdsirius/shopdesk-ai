@@ -1,15 +1,16 @@
-# 项目记忆：掌柜智库带练重建
+# 项目概览：ShopDesk AI（商答台）
 
 ## 已确认事实
 
-- 新项目仓库名：`shopkeeper-brain`
+- 对外名称：**ShopDesk AI（商答台）**。GitHub 仓库：[kdsirius/shopdesk-ai](https://github.com/kdsirius/shopdesk-ai)，已由用户创建并推送，首次推送时为私有。
+- 原带练项目名：`shopkeeper-brain`，本次更名只对外展示。
 - Python 包名：`shopkeeper_brain`
 - 配置前缀：`SHOPKEEPER_BRAIN_`
 - 参考项目：`reference/掌教智库/`
 - 视频资料：`reference/掌教智库/4.视频/day01` 至 `day16`
 - 包管理工具：`uv`
 - 学习方式：教程先于手敲；用户手敲代码；上一节验收通过后才开始下一节
-- 原项目优先：完成原项目已有能力前不主动扩展；发现缺陷时记录后再讨论修正
+- 带练已结束；原功能作为扩展讨论的基线，尚未确定新的实现范围
 - 实验区：`workspace/`，已由根目录 `.gitignore` 忽略
 - 参考资料优先级：先看 `4.视频/dayXX/` 的视频目录图片确定当天范围，再看当天课堂笔记和代码；`1.笔记/` 作为补充资料，不覆盖对应视频日的内容事实
 
@@ -30,7 +31,7 @@
 
 ## 业务全景
 
-“掌柜智库”是一个面向产品手册、维修指南和技术文档的 RAG 知识库问答系统。它把 PDF/Markdown 文档加工成可检索知识，再通过多路召回、融合、重排和大语言模型生成答案，并用 FastAPI/SSE 提供交互服务。
+ShopDesk AI 基于「掌柜智库」带练重建的手册问答链路。它把 PDF/Markdown 商品文档加工成可检索知识，再通过多路召回、融合、重排和大语言模型生成答案，并用 FastAPI/SSE 提供交互服务。
 
 ```mermaid
 flowchart LR
@@ -79,6 +80,10 @@ flowchart LR
 | [front/](../../src/shopkeeper_brain/front/) | 同源状态页、SSE 练习页、导入页和查询页 |
 
 当前业务调用方向为 `api → services → processor`，前端通过同源 API 访问业务。共享配置和工具位于 `core`、`utils`。
+
+## 电商客服扩展（待讨论）
+
+当前从商品知识问答起步，订单查询、退换货和人工转接均未接入。下一阶段先选一个要解决的客服场景，梳理哪些导入、检索和会话能力可以复用，再确认第一版范围与验收判据；讨论确认前不改业务源码。
 
 ## 重要边界
 
