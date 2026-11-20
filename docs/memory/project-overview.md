@@ -17,7 +17,7 @@
 
 ## 接手入口
 
-- 最近已提交的功能迭代基线为 `f80a59d`（根目录 `app/` 迁移）；用户真实测试见[迁移交付](../delivery/2026-11-20-根目录应用包迁移.md)。本轮新发行名、Python 3.12 和配置切换见[升级交付](../delivery/2026-11-20-项目改名与Python312升级.md)，后续迭代从[功能交付](../delivery/)查改动与验收记录。
+- 最近已验收并提交的功能迭代基线为 `bc69434`：统一 `shopdesk-ai` 命名、切换 Python 3.12 和精简配置键。步骤及用户实测见[升级交付](../delivery/2026-11-20-项目改名与Python312升级.md)；前一轮根目录 `app/` 迁移见[迁移交付](../delivery/2026-11-20-根目录应用包迁移.md)。后续迭代的改动和验收从[功能交付](../delivery/)查阅。
 - 带练章节状态、提交基线和留待验证事项见[学习进度](learning-progress.md)。维护历史教程时，以[文档区规则](../AGENTS.md)、[教学偏好](teaching-preferences.md)和[第 6 节教程](../study/day06-主体识别.md)为准；第 3 节作为补充样例。
 - 工程使用说明见根 [README](../../README.md)。答案生成、流式正文和配图回显见[第 16 节验收记录](day16-acceptance.md)。业务上传、查询进度和会话历史见[第 15 节验收记录](day15-acceptance.md)。FastAPI 输入校验和 SSE 见[第 14 节验收记录](day14-acceptance.md)与[备课记录](day14-preparation.md)。Web 服务骨架见 [第 13 节验收记录](day13-acceptance.md) 和 [第 13 节备课记录](day13-preparation.md)，融合与重排见 [第 12 节验收记录](day12-acceptance.md) 和 [第 12 节备课记录](day12-preparation.md)，HyDE 与联网搜索见 [第 11 节验收记录](day11-acceptance.md) 和 [第 11 节备课记录](day11-preparation.md)，向量检索见 [第 10 节验收记录](day10-acceptance.md) 和 [第 10 节备课记录](day10-preparation.md)，查询骨架与产品确认见 [第 9 节验收记录](day09-acceptance.md) 和 [第 9 节备课记录](day09-preparation.md)，两类集合与入库资料依据见 [第 8 节备课记录](day08-preparation.md)，向量资料错位见 [第 7 节备课记录](day07-preparation.md)。更早验收文件记录当时事实，不把其中“下一节”或环境限制直接当作当前状态。
 - 参考资料物理目录存在错位：`4.视频/day06/`仍是文档切片，主体识别和向量基础资料分布在 day07/day08。后续先读视频目录图片再定真实主题，不能仅按目录编号推断内容。
