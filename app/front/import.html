@@ -15,18 +15,27 @@
         nav { display: flex; gap: 4px; }
         nav a { padding: 8px 12px; border-radius: 999px; font-size: .88rem; }
         nav a[aria-current], nav a:hover { background: #e5effa; color: #21476e; }
-        main { width: min(100% - 32px, 760px); margin: clamp(32px, 10vh, 88px) auto 32px; }
+        main { width: min(100% - 32px, 760px); margin: clamp(32px, 8vh, 72px) auto 32px; text-align: center; }
         h1 { color: #233548; margin: 0; font-size: clamp(1.7rem, 4vw, 2.35rem); font-weight: 550; }
         p { color: #52677b; }
-        form { display: grid; justify-items: start; gap: 16px; background: #ffffffdb; border: 1px solid #d9e4f0; border-radius: 20px; padding: clamp(18px, 4vw, 32px); }
-        input { display: block; max-width: 100%; margin-top: 8px; font: inherit; }
-        button, input::file-selector-button { border: 0; border-radius: 999px; padding: 10px 18px; font: inherit; cursor: pointer; }
-        input::file-selector-button { background: #e5effa; color: #21476e; }
-        button { background: #224565; color: #fff; }
+        #drop-zone { position: relative; display: grid; place-content: center; justify-items: center; gap: 8px; min-height: 184px; padding: 24px; border: 2px dashed #9cb8d3; border-radius: 20px; background: #ffffffdb; color: #224565; }
+        #drop-zone:hover, #drop-zone.drag-over { border-color: #346faf; background: #eaf3fc; }
+        #drop-zone small { color: #52677b; }
+        #drop-zone input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        #drop-zone input:disabled { cursor: default; }
+        #file-status { overflow-wrap: anywhere; }
+        button { min-height: 44px; border: 0; border-radius: 999px; padding: 10px 18px; font: inherit; cursor: pointer; background: #224565; color: #fff; }
         button:hover:not(:disabled) { background: #17354f; }
         button:disabled { opacity: .48; cursor: default; }
-        :focus-visible { outline: 2px solid #346faf; outline-offset: 3px; }
-        #import-result { color: #52677b; white-space: pre-wrap; overflow-wrap: anywhere; }
+        :focus-visible, #drop-zone:has(input:focus-visible) { outline: 2px solid #346faf; outline-offset: 3px; }
+        #import-details { margin-top: 28px; text-align: left; }
+        .progress-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; color: #52677b; font-size: .9rem; }
+        progress { width: 100%; height: 12px; accent-color: #336a9e; }
+        #import-result { margin: 8px 0; color: #233548; }
+        #import-stages { margin: 10px 0 0; padding-left: 1.5em; font-size: .9rem; color: #52677b; }
+        #import-stages li[data-state='已完成'] { color: #245f49; }
+        #import-stages li[data-state='当前阶段'] { color: #21476e; font-weight: 700; }
+        #import-stages li[data-state='已完成']::after { content: ' ✓'; }
     </style>
 </head>
 <body>
@@ -38,36 +47,143 @@
         <h1>导入手册</h1>
         <p>上传商品手册。入库完成后，就可以按商品型号提问。</p>
         <form id="upload-form">
-            <label>选择 PDF 或 Markdown 手册 <input name="file" type="file" accept=".md,.pdf" required></label>
-            <button type="submit">上传</button>
+            <label id="drop-zone" for="manual-file">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m-5 5 5-5 5 5M5 15v4a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4"/></svg>
+                <strong>点击选择或拖入手册</strong>
+                <small>每次一份 · PDF 或 Markdown</small>
+                <input id="manual-file" name="file" type="file" accept=".md,.pdf">
+            </label>
+            <p id="file-status" role="status">尚未选择文件</p>
+            <button id="start-import" type="submit" disabled>开始导入</button>
         </form>
-        <pre id="import-result" aria-live="polite">等待上传</pre>
+        <section id="import-details" aria-label="导入进度" hidden>
+            <div class="progress-meta">
+                <label id="import-count" for="import-progress"></label>
+                <span>已用时间 <time id="import-elapsed">00:00</time></span>
+            </div>
+            <progress id="import-progress" value="0"></progress>
+            <p id="import-result" role="status"></p>
+            <ol id="import-stages"></ol>
+        </section>
     </main>
     <script>
         const form = document.getElementById("upload-form");
-        const button = form.querySelector("button");
+        const dropZone = document.getElementById("drop-zone");
+        const input = document.getElementById("manual-file");
+        const button = document.getElementById("start-import");
+        const fileStatus = document.getElementById("file-status");
+        const details = document.getElementById("import-details");
+        const bar = document.getElementById("import-progress");
+        const count = document.getElementById("import-count");
+        const elapsed = document.getElementById("import-elapsed");
         const result = document.getElementById("import-result");
+        const stageList = document.getElementById("import-stages");
+        const stages = [
+            ["node_entry", "读取手册"], ["node_pdf_to_md", "PDF 解析"],
+            ["node_md_img", "处理图片"], ["node_document_split", "章节切片"],
+            ["node_item_name_recognition", "识别商品"], ["node_bge_embedding", "切片向量化"],
+            ["node_import_milvus", "写入知识库"],
+        ];
+        let selected;
+
+        function selectFile(files) {
+            if (input.disabled || !files.length) return;
+            selected = files.length === 1 && /\.(pdf|md)$/i.test(files[0].name) ? files[0] : null;
+            fileStatus.textContent = selected ? `已选择：${selected.name}` : "请选择一份 PDF 或 Markdown 手册。";
+            button.disabled = !selected;
+            details.hidden = true;
+        }
+
+        input.addEventListener("change", () => {
+            selectFile(input.files);
+            input.value = "";
+        });
+        dropZone.addEventListener("dragover", (event) => {
+            event.preventDefault();
+            if (!input.disabled) dropZone.classList.add("drag-over");
+        });
+        dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
+        dropZone.addEventListener("drop", (event) => {
+            event.preventDefault();
+            dropZone.classList.remove("drag-over");
+            selectFile(event.dataTransfer.files);
+        });
+
+        function announce(message) {
+            if (result.textContent !== message) result.textContent = message;
+        }
 
         form.addEventListener("submit", async (event) => {
             event.preventDefault();
-            button.disabled = true;
-            result.textContent = "正在上传…";
+            if (!selected || button.disabled) return;
+            button.disabled = input.disabled = true;
+            const path = stages.filter(([node]) => /\.pdf$/i.test(selected.name) || node !== "node_pdf_to_md");
+            const steps = path.map(([, title]) => {
+                const li = document.createElement("li");
+                li.textContent = `${title} · 待处理`;
+                return li;
+            });
+            stageList.replaceChildren(...steps);
+            bar.max = path.length;
+            bar.value = 0;
+            count.textContent = `已完成 0 / ${path.length} 步`;
+            details.hidden = false;
+            announce("正在上传手册…");
+            const start = Date.now();
+            const tick = () => {
+                const seconds = Math.floor((Date.now() - start) / 1000);
+                elapsed.textContent = [Math.floor(seconds / 60), seconds % 60].map(n => String(n).padStart(2, "0")).join(":");
+            };
+            tick();
+            const timer = setInterval(tick, 1000);
+            const data = new FormData();
+            data.append("file", selected);
+            let phase = "等待导入";
             try {
-                const upload = await fetch("/upload", { method: "POST", body: new FormData(form) });
-                if (!upload.ok) throw new Error(`上传 HTTP ${upload.status}`);
+                const upload = await fetch("/upload", { method: "POST", body: data });
+                if (!upload.ok) throw new Error(`HTTP ${upload.status}`);
                 const { task_id } = await upload.json();
                 while (true) {
-                    const response = await fetch(`/status/${task_id}`);
-                    if (!response.ok) throw new Error(`状态 HTTP ${response.status}`);
-                    const { status, done_list } = await response.json();
-                    result.textContent = [task_id, status, ...done_list].join("\n");
-                    if (status === "completed" || status === "failed") break;
+                    let status, done_list;
+                    try {
+                        const response = await fetch(`/status/${task_id}`, { cache: "no-store", signal: AbortSignal.timeout(8000) });
+                        if (response.status === 404) {
+                            announce("找不到导入任务，服务可能已重启。");
+                            break;
+                        }
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        ({ status, done_list } = await response.json());
+                    } catch {
+                        announce(`${phase} · 暂时无法读取进度，正在重试…`);
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        continue;
+                    }
+                    const done = new Set(done_list);
+                    const next = path.findIndex(([node]) => !done.has(node));
+                    bar.value = path.filter(([node]) => done.has(node)).length;
+                    count.textContent = `已完成 ${bar.value} / ${path.length} 步`;
+                    steps.forEach((step, i) => {
+                        const [node, title] = path[i];
+                        const state = done.has(node) ? "已完成" : i === next && status === "processing" ? "当前阶段" : "待处理";
+                        if (step.dataset.state !== state) {
+                            step.dataset.state = state;
+                            step.textContent = `${title} · ${state}`;
+                        }
+                    });
+                    if (status === "completed" || status === "failed") {
+                        announce(status === "completed" ? "导入完成，可以按商品型号提问。" : "导入失败，请查看服务端日志。");
+                        break;
+                    }
+                    phase = status === "pending" ? "等待导入" : next === -1 ? "正在确认导入结果" : `当前阶段：${path[next][1]}`;
+                    announce(phase);
                     await new Promise(resolve => setTimeout(resolve, 500));
                 }
             } catch (error) {
-                result.textContent = error.message;
+                announce(`上传未确认：${error.message}。请检查服务。`);
             } finally {
-                button.disabled = false;
+                clearInterval(timer);
+                tick();
+                button.disabled = input.disabled = false;
             }
         });
     </script>

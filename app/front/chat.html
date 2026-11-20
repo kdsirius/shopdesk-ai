@@ -33,7 +33,14 @@
         .body ol, .body ul { padding-inline-start: 1.5em; }
         .images { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 14px 0 0; }
         .images figcaption { grid-column: 1 / -1; font-size: .82rem; color: #52677b; }
-        .images img { width: 100%; height: 124px; object-fit: contain; padding: 6px; border: 1px solid #e3eaf2; border-radius: 12px; background: #fff; }
+        .images button { width: 100%; height: auto; padding: 0; border: 1px solid #e3eaf2; border-radius: 12px; background: #fff; cursor: zoom-in; }
+        .images button:hover:not(:disabled) { border-color: #78a7d4; background: #eff6fd; }
+        .images img { display: block; width: 100%; height: 124px; object-fit: contain; padding: 6px; }
+        #image-preview { max-width: min(92vw, 1080px); max-height: 92dvh; padding: 12px 16px 16px; border: 1px solid #d9e4f0; border-radius: 16px; background: #fff; color: inherit; }
+        #image-preview::backdrop { background: #172938b8; }
+        .preview-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
+        #image-preview img { display: block; min-width: min(220px, 75vw); max-width: 100%; max-height: 74dvh; margin: auto; object-fit: contain; }
+        #image-preview button { font-size: 1.05rem; }
         form { position: sticky; bottom: 0; display: flex; align-items: center; gap: 8px; padding: 9px 12px 9px 18px; margin-bottom: 18px; border: 1px solid #d9e4f0; border-radius: 28px; background: #fff; box-shadow: 0 5px 20px #22405c12; }
         input, button { font: inherit; }
         input { flex: 1; min-width: 0; min-height: 44px; border: 0; border-radius: 8px; padding: 0 8px; color: inherit; background: transparent; }
@@ -60,11 +67,22 @@
             <button type="submit" aria-label="发送" title="发送" disabled>↑</button>
         </form>
     </main>
+    <dialog id="image-preview" aria-labelledby="preview-title">
+        <div class="preview-top">
+            <strong id="preview-title">手册配图</strong>
+            <button type="button" aria-label="关闭配图预览" autofocus>×</button>
+        </div>
+        <img alt="参考图片大图">
+    </dialog>
     <script>
         const form = document.getElementById("query-form");
         const button = form.querySelector("button");
         const question = document.getElementById("question");
         const thread = document.getElementById("thread");
+        const preview = document.getElementById("image-preview");
+        const previewImage = preview.querySelector("img");
+        preview.querySelector("button").addEventListener("click", () => preview.close());
+        preview.addEventListener("close", () => previewImage.removeAttribute("src"));
         const sessionId = sessionStorage.getItem("shopkeeper-session") || crypto.randomUUID();
         sessionStorage.setItem("shopkeeper-session", sessionId);
         const stages = {
@@ -136,11 +154,19 @@
             const caption = document.createElement("figcaption");
             caption.textContent = "参考配图";
             container.append(caption);
-            for (const url of urls) {
+            for (const [index, url] of urls.entries()) {
+                const thumbnail = document.createElement("button");
+                thumbnail.type = "button";
+                thumbnail.setAttribute("aria-label", `放大参考图片 ${index + 1}`);
                 const image = document.createElement("img");
                 image.src = url;
-                image.alt = "参考图片";
-                container.append(image);
+                image.alt = "";
+                thumbnail.append(image);
+                thumbnail.addEventListener("click", () => {
+                    previewImage.src = url;
+                    preview.showModal();
+                });
+                container.append(thumbnail);
             }
         }
 

@@ -22,9 +22,13 @@
         .primary { background: #224565; color: #fff; }
         .primary:hover { background: #17354f; }
         button { color: #224565; background: #fff; }
-        button:hover { background: #e5effa; }
+        button:hover:not(:disabled) { background: #e5effa; }
+        button:disabled { opacity: .6; cursor: default; }
         :focus-visible { outline: 2px solid #346faf; outline-offset: 3px; }
-        #health-result { color: #52677b; white-space: pre-wrap; }
+        #health-result { display: table; margin: 14px auto 0; padding: 5px 12px; border-radius: 999px; background: #e5effa; color: #21476e; font-size: .88rem; }
+        #health-result:empty { display: none; }
+        #health-result[data-state='ok'] { background: #e5f3eb; color: #245f49; }
+        #health-result[data-state='error'] { background: #faeded; color: #863e3e; }
     </style>
 </head>
 <body>
@@ -37,7 +41,7 @@
         <p>导入商品手册后，输入商品型号和问题，即可查看回答与参考配图。</p>
         <a class="primary" href="/chat.html">开始问答</a>
         <button id="check-health" type="button">检查服务</button>
-        <pre id="health-result" aria-live="polite">等待检查</pre>
+        <p id="health-result" role="status"></p>
     </main>
 
     <script>
@@ -45,16 +49,19 @@
         const result = document.getElementById("health-result");
 
         button.addEventListener("click", async () => {
-            result.textContent = "正在检查…";
+            button.disabled = true;
+            result.dataset.state = "checking";
+            result.textContent = "检查中…";
             try {
-                const response = await fetch("/health");
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                const health = await response.json();
-                result.textContent = JSON.stringify(health);
-            } catch (error) {
-                result.textContent = `检查失败：${error.message}`;
+                const response = await fetch("/health", { cache: "no-store", signal: AbortSignal.timeout(8000) });
+                if (!response.ok || (await response.json()).ok !== true) throw new Error();
+                result.dataset.state = "ok";
+                result.textContent = "Web 服务可访问";
+            } catch {
+                result.dataset.state = "error";
+                result.textContent = "检查失败，可重试";
+            } finally {
+                button.disabled = false;
             }
         });
     </script>
