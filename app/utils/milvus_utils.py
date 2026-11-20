@@ -18,7 +18,7 @@ def get_milvus_client() -> MilvusClient:
 
     config = load_milvus_config()
     if not config.uri:
-        raise ConfigurationError("Milvus URI 未配置，请检查 SHOPKEEPER_BRAIN_MILVUS_URI")
+        raise ConfigurationError("Milvus URI 未配置，请检查 MILVUS_URI")
 
     _milvus_client = MilvusClient(uri=config.uri)
     return _milvus_client

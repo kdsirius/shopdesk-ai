@@ -115,17 +115,17 @@ class NodeMdImg(BaseNode):
         config = load_image_config()
         if not config.base_url:
             raise ConfigurationError(
-                message="视觉模型配置缺失：SHOPKEEPER_BRAIN_VL_BASE_URL",
+                message="视觉模型配置缺失：VL_BASE_URL",
                 node_name=self.name,
             )
         if not config.api_key:
             raise ConfigurationError(
-                message="视觉模型配置缺失：SHOPKEEPER_BRAIN_VL_API_KEY",
+                message="视觉模型配置缺失：VL_API_KEY",
                 node_name=self.name,
             )
         if not config.model:
             raise ConfigurationError(
-                message="视觉模型配置缺失：SHOPKEEPER_BRAIN_VL_MODEL",
+                message="视觉模型配置缺失：VL_MODEL",
                 node_name=self.name,
             )
         request_times: Deque[float] = deque()
@@ -260,10 +260,10 @@ class NodeMdImg(BaseNode):
         """清理旧对象、上传图片，并替换 Markdown 中的图片标签。"""
         config = load_minio_config()
         for field_name, value in (
-                ("SHOPKEEPER_BRAIN_MINIO_ENDPOINT", config.endpoint),
-                ("SHOPKEEPER_BRAIN_MINIO_ACCESS_KEY", config.access_key),
-                ("SHOPKEEPER_BRAIN_MINIO_SECRET_KEY", config.secret_key),
-                ("SHOPKEEPER_BRAIN_MINIO_BUCKET", config.bucket),
+                ("MINIO_ENDPOINT", config.endpoint),
+                ("MINIO_ACCESS_KEY", config.access_key),
+                ("MINIO_SECRET_KEY", config.secret_key),
+                ("MINIO_BUCKET", config.bucket),
         ):
             if not value:
                 raise ConfigurationError(

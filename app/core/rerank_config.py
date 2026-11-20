@@ -25,9 +25,9 @@ def load_rerank_config() -> RerankConfig:
 
     return RerankConfig(
         # .env.example 里模型名可以留空，留空时使用 qwen3-rerank。
-        model=os.getenv("SHOPKEEPER_BRAIN_RERANK_MODEL", "").strip() or DEFAULT_RERANK_MODEL,
-        instruct=os.getenv("SHOPKEEPER_BRAIN_RERANK_INSTRUCT", "").strip(),
-        api_key=SecretStr(os.getenv("SHOPKEEPER_BRAIN_RERANK_API_KEY", "").strip()),
+        model=os.getenv("RERANK_MODEL", "").strip() or DEFAULT_RERANK_MODEL,
+        instruct=os.getenv("RERANK_INSTRUCT", "").strip(),
+        api_key=SecretStr(os.getenv("RERANK_API_KEY", "").strip()),
     )
 
 

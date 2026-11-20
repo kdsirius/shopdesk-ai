@@ -11,7 +11,7 @@
 | 新项目 | `shopkeeper-brain` |
 | Python 包 | `shopkeeper_brain` |
 | 参考项目 | `reference/掌教智库/` |
-| 环境与构建 | Python 声明 `>=3.11`，工程选择 3.11；最近实际验收为 CPython 3.11.15。按锁文件在 workspace 副本同步与编译，方法见 [验收手册](verification-playbook.md) |
+| 带练环境 | 当时声明 `>=3.11`，最终验收使用 CPython 3.11.15。当前位置的 Python 版本和配置见[项目概览](project-overview.md)，隔离验证方式见[验收手册](verification-playbook.md) |
 | 验证方式 | 当前无项目 pytest 套件；使用 IDE 学习入口、真实输入与隔离行为探针，不把探针项数当测试条数 |
 | 已核对提交 | 第 8 节为 `29d2830`；第 9 节代码为 `3552bc9`，教程与验收文档为 `99105f0`（用户提交时 `-m` 引号写进了标题，不影响内容）。其后的包名路径同步与记忆收尾以实际 Git 日志为准；第 10 节代码为 `0bb821b`，教程与验收文档为 `6b157d8`；第 11 节代码为 `c65801b`，教程与验收文档为 `2578de1`；第 12 节代码为 `508d36e`，教程与验收文档为 `bc5e80f`。第 13 节代码、教程与验收文档为 `e3ff008`。第 14 节代码、教程与验收文档为 `62636d8`；第 15 节为 `1404667`；第 16 节源码与教程为 `e839494` |
 | 最近实测基线 | 第 16 节实际源码通过同步查询、浏览器 SSE、MongoDB 历史、节点进度复验及 wheel 构建；提交与复验源码一致。见[第 16 节验收](day16-acceptance.md) |
@@ -109,7 +109,7 @@
 
 - 16 节带练范围已验收完成，不再安排新教程。后续按 ShopDesk AI 的电商客服方向讨论扩展，不预设实现方案。接手先只读核对 Git 状态和提交，保留已有改动；从 [README](../../README.md)、[项目概览](project-overview.md)和[第 16 节验收记录](day16-acceptance.md)了解现状，未验证行为以本页欠账为准。
 - 查询闭环的带练基线为 `e839494`。当前入口及追踪见[查询主图](../../app/processor/query_processor/main_graph.py)、[答案节点](../../app/processor/query_processor/nodes/node_answer_output.py)、[查询服务](../../app/services/query_service.py)、[业务 API](../../app/api/business.py)和[查询页](../../app/front/chat.html)。`run_id` 用于一次性 SSE 订阅，成功流用 `progress`、`delta` 和 `complete`，失败终态为 `task_error`；`session_id` 用于 [MongoDB 历史](../../app/utils/mongo_history_utils.py)，接口返回最近 5 条，正文与配图一起读回。
-- 第 12 节结果：`node_rrf` 返回 `rrf_chunks`（`entity` 字典列表，含 `chunk_id`、`content`、`item_name`，不含分数），`node_rerank` 返回 `reranked_docs`（元素 `{content, title, chunk_id, url, source, score}`，`source` 为 `local` 或 `web`，3 到 10 条；重排失败降级时只含本地结果且 `score` 为 `None`）。答案输出节点读取 `reranked_docs`，并兼容 `score=None` 与联网结果的 `url`。重排依赖 `dashscope`，配置变量 `SHOPKEEPER_BRAIN_RERANK_*`，密钥只在本地 `.env`。
+- 第 12 节结果：`node_rrf` 返回 `rrf_chunks`（`entity` 字典列表，含 `chunk_id`、`content`、`item_name`，不含分数），`node_rerank` 返回 `reranked_docs`（元素 `{content, title, chunk_id, url, source, score}`，`source` 为 `local` 或 `web`，3 到 10 条；重排失败降级时只含本地结果且 `score` 为 `None`）。答案输出节点读取 `reranked_docs`，并兼容 `score=None` 与联网结果的 `url`。重排依赖 `dashscope`；带练时的 `SHOPKEEPER_BRAIN_RERANK_*` 在当前版本对应 `RERANK_*`，密钥只在本地 `.env`。
 - 第 11 节结果：`node_search_embedding_hyde` 返回 `hyde_embedding_chunks`，`node_web_search_mcp` 返回 `web_search_docs`（元素是 `{title, url, snippet}`，`snippet` 已截断到 500 字，来自 Tavily 的 `content`）；两路运行期故障返回空列表，所以后面的 RRF 和 Rerank 必须能处理这两个字段为空的情况。向量检索与 HyDE 的元素保持 PyMilvus 原形状（`chunk_id`、`distance`、`entity`）。联网搜索的相关性有浮动，会混入无关页面，交给重排处理。Tavily 密钥只在本地 `.env`，依赖已新增 `mcp`；`mcp 2.3.0` 的客户端接口是新版（`Client`、`is_error`、`httpx2`），与网上多数 1.x 示例不同。
 - 第 9 节结果：查询骨架在 `processor/query_processor/`（`main_graph.py` 在该目录，节点在 `nodes/`），导入包已由用户改名为 `import_processor`，后续教程和验收以真实包名为准。产品确认只查 `kb_item_names`，第 10 节才检索 `kb_chunks` 正文；三个并行检索节点只返回各自字段；正文检索从第 10 节起支持商品过滤。
 - 第 8 节正式数据源为 Milvus 的 `kb_item_names` 和 `kb_chunks`：验收时分别有 `RS PRO RS-12 数字万用表` 的 1 条主体记录和 21 条 Chunk。名称主键为 `pk`，Chunk 主键为 `chunk_id`。保留的 `verify_d08_b5001e7810_*` 集合仅供实验，不能用于产品确认或正文查询。

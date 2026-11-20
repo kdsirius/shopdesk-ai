@@ -27,11 +27,11 @@
 
 先复制真实源码、依赖清单与锁文件，检查当前解释器和必要的本地模型。只复制本节需要的配置，不把无关服务密钥带进副本。已验收的源码与提交后文件字节一致时，文档收尾只做一致性检查，不无故重复请求外部服务或模型。
 
-下面是操作模板（未验证／未运行），应在已建立的 workspace 隔离工程目录执行；实际解释器与命令以本轮环境检查为准：
+下面是当前源码布局的操作模板（未验证／未运行），应在已建立的 workspace 隔离工程目录执行。若复验带练时期的提交，编译路径以所选提交的包目录为准：
 
 ```bash
-uv sync --locked --python 3.11 --default-index https://pypi.tuna.tsinghua.edu.cn/simple
-uv run --locked python -m compileall -q src/shopkeeper_brain
+uv sync --locked --python 3.12 --default-index https://pypi.tuna.tsinghua.edu.cn/simple
+uv run --locked python -m compileall -q app
 ```
 
 当前项目没有 pytest 套件，不默认执行 `pytest`，也不为验收临时给项目新增测试框架。编译和导入只证明准备阶段，仍须用真实节点、真实输入与模型或服务检查行为；无法运行的业务项分别记为跳过或未运行。测试条数仅在实际测试框架确实运行时取输出，行为探针按检查项记录，不换算为测试条数。

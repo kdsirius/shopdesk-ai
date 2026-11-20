@@ -20,7 +20,7 @@ def load_milvus_config() -> MilvusConfig:
     load_dotenv(project_root / ".env", override=False)
 
     return MilvusConfig(
-        uri=os.getenv("SHOPKEEPER_BRAIN_MILVUS_URI", "").strip(),
-        item_name_collection=os.getenv("SHOPKEEPER_BRAIN_MILVUS_ITEM_NAME_COLLECTION", "").strip(),
-        chunk_collection=os.getenv("SHOPKEEPER_BRAIN_MILVUS_CHUNK_COLLECTION", "").strip()
+        uri=os.getenv("MILVUS_URI", "").strip(),
+        item_name_collection=os.getenv("MILVUS_ITEM_NAME_COLLECTION", "").strip(),
+        chunk_collection=os.getenv("MILVUS_CHUNK_COLLECTION", "").strip()
     )

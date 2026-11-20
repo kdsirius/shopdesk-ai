@@ -1,12 +1,12 @@
 [project]
-name = "shopkeeper-brain"
+name = "shopdesk-ai"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [
     { name = "kdsirius", email = "2915049950@qq.com" }
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "langgraph>=1.2.20",
     "requests>=2.32.5",
@@ -29,7 +29,7 @@ dependencies = [
 ]
 
 [project.scripts]
-shopkeeper-brain = "app:main"
+shopdesk-ai = "app:main"
 
 [tool.uv.build-backend]
 module-name = "app"

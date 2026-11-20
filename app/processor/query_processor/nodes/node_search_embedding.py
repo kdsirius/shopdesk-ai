@@ -35,7 +35,7 @@ class NodeSearchEmbedding(NodeBase):
         collection_name = load_milvus_config().chunk_collection
         if not collection_name.strip():
             raise ConfigurationError(
-                "Chunk 集合未配置，请检查 SHOPKEEPER_BRAIN_MILVUS_CHUNK_COLLECTION",
+                "Chunk 集合未配置，请检查 MILVUS_CHUNK_COLLECTION",
                 node_name=self.name,
             )
 

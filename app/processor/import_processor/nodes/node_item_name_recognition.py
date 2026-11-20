@@ -138,7 +138,7 @@ class NodeItemNameRecognition(BaseNode):
         if not config.item_name_collection:
             raise ConfigurationError(
                 "主体名称集合未配置，请检查 "
-                "SHOPKEEPER_BRAIN_MILVUS_ITEM_NAME_COLLECTION",
+                "MILVUS_ITEM_NAME_COLLECTION",
                 node_name=self.name,
             )
         if not isinstance(file_title, str) or not file_title.strip():

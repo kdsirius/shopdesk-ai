@@ -48,7 +48,7 @@ class NodeWebSearchMcp(NodeBase):
         api_key = config.api_key.get_secret_value()
         if not api_key:
             raise ConfigurationError(
-                "Tavily 密钥未配置，请检查 SHOPKEEPER_BRAIN_TAVILY_API_KEY",
+                "Tavily 密钥未配置，请检查 TAVILY_API_KEY",
                 node_name=self.name,
             )
 

@@ -23,8 +23,8 @@ def load_tavily_config() -> TavilyConfig:
 
     return TavilyConfig(
         # .env.example 里地址留空，留空时也使用官方地址。
-        mcp_url=os.getenv("SHOPKEEPER_BRAIN_TAVILY_MCP_URL", "").strip() or DEFAULT_TAVILY_MCP_URL,
-        api_key=SecretStr(os.getenv("SHOPKEEPER_BRAIN_TAVILY_API_KEY", "").strip()),
+        mcp_url=os.getenv("TAVILY_MCP_URL", "").strip() or DEFAULT_TAVILY_MCP_URL,
+        api_key=SecretStr(os.getenv("TAVILY_API_KEY", "").strip()),
     )
 
 

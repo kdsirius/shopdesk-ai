@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, constr
 from app.api.business import router
 
-app = FastAPI(title="掌柜智库")
+app = FastAPI(title="ShopDesk AI（商答台）")
 app.include_router(router)
 # 从入口文件定位页面，IDE 的工作目录变化时路径仍然有效。
 INDEX_PATH = Path(__file__).resolve().parents[1] / "front" / "index.html"

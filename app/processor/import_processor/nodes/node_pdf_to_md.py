@@ -76,8 +76,8 @@ class NodePDFToMD(BaseNode):
         """申请上传地址、上传 PDF，并轮询到 MinerU 返回 ZIP 地址。"""
         config = load_mineru_config()
         for field_name, value in (
-            ("SHOPKEEPER_BRAIN_MINERU_BASE_URL", config.base_url),
-            ("SHOPKEEPER_BRAIN_MINERU_API_TOKEN", config.api_token),
+            ("MINERU_BASE_URL", config.base_url),
+            ("MINERU_API_TOKEN", config.api_token),
         ):
             if not value:
                 raise ConfigurationError(

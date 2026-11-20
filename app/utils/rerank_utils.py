@@ -11,7 +11,7 @@ def rerank_documents(query: str, documents: list[str]) -> list[float]:
     config = load_rerank_config()
     api_key = config.api_key.get_secret_value()
     if not api_key:
-        raise ConfigurationError("重排密钥未配置，请检查 SHOPKEEPER_BRAIN_RERANK_API_KEY")
+        raise ConfigurationError("重排密钥未配置，请检查 RERANK_API_KEY")
 
     response = dashscope.TextReRank.call(
         model=config.model,

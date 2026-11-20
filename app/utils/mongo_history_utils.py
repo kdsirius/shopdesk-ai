@@ -22,7 +22,7 @@ def get_chat_message_collection() -> Collection:
 
     config = load_mongo_config()
     if not config.uri or not config.db_name:
-        raise ConfigurationError("MongoDB 未配置，请检查 SHOPKEEPER_BRAIN_MONGO_URI 和 SHOPKEEPER_BRAIN_MONGO_DB_NAME")
+        raise ConfigurationError("MongoDB 未配置，请检查 MONGO_URI 和 MONGO_DB_NAME")
 
     # 创建客户端不会立刻连接；5 秒内选不到服务器就报错，虚拟机没开时不用干等 30 秒。
     client = MongoClient(host=config.uri, serverSelectionTimeoutMS=5000)

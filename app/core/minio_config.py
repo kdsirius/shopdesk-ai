@@ -23,14 +23,14 @@ def load_minio_config() -> MinioConfig:
     load_dotenv(project_root / ".env", override=False)
 
     return MinioConfig(
-        endpoint=os.getenv("SHOPKEEPER_BRAIN_MINIO_ENDPOINT", "").strip(),
-        access_key=os.getenv("SHOPKEEPER_BRAIN_MINIO_ACCESS_KEY", "").strip(),
-        secret_key=os.getenv("SHOPKEEPER_BRAIN_MINIO_SECRET_KEY", "").strip(),
-        bucket=os.getenv("SHOPKEEPER_BRAIN_MINIO_BUCKET", "").strip(),
+        endpoint=os.getenv("MINIO_ENDPOINT", "").strip(),
+        access_key=os.getenv("MINIO_ACCESS_KEY", "").strip(),
+        secret_key=os.getenv("MINIO_SECRET_KEY", "").strip(),
+        bucket=os.getenv("MINIO_BUCKET", "").strip(),
         image_prefix=os.getenv(
-            "SHOPKEEPER_BRAIN_MINIO_IMAGE_PREFIX", "upload-images"
+            "MINIO_IMAGE_PREFIX", "upload-images"
         ).strip().strip("/"),
         secure=os.getenv(
-            "SHOPKEEPER_BRAIN_MINIO_SECURE", "false"
+            "MINIO_SECURE", "false"
         ).strip().lower() == "true",
     )

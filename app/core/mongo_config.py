@@ -19,6 +19,6 @@ def load_mongo_config() -> MongoConfig:
     load_dotenv(project_root / ".env", override=False)
 
     return MongoConfig(
-        uri=os.getenv("SHOPKEEPER_BRAIN_MONGO_URI", "").strip(),
-        db_name=os.getenv("SHOPKEEPER_BRAIN_MONGO_DB_NAME", "").strip(),
+        uri=os.getenv("MONGO_URI", "").strip(),
+        db_name=os.getenv("MONGO_DB_NAME", "").strip(),
     )

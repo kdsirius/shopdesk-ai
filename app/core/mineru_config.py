@@ -16,6 +16,6 @@ def load_mineru_config() -> MinerUConfig:
     project_root = Path(__file__).resolve().parents[2]
     load_dotenv(project_root / ".env", override=False)
     return MinerUConfig(
-        base_url=os.getenv("SHOPKEEPER_BRAIN_MINERU_BASE_URL", "").strip().rstrip("/"),
-        api_token=os.getenv("SHOPKEEPER_BRAIN_MINERU_API_TOKEN", "").strip(),
+        base_url=os.getenv("MINERU_BASE_URL", "").strip().rstrip("/"),
+        api_token=os.getenv("MINERU_API_TOKEN", "").strip(),
     )

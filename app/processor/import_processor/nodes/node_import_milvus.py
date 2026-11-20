@@ -94,7 +94,7 @@ class NodeImportMilvus(BaseNode):
         """连接 Milvus，并在缺少 Chunk 集合时创建它。"""
         if not config.chunk_collection:
             raise ConfigurationError(
-                "Chunk 集合未配置，请检查 SHOPKEEPER_BRAIN_MILVUS_CHUNK_COLLECTION",
+                "Chunk 集合未配置，请检查 MILVUS_CHUNK_COLLECTION",
                 node_name=self.name
             )
 

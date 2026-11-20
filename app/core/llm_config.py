@@ -23,11 +23,11 @@ def load_llm_config() -> LLMConfig:
     load_dotenv(project_root / ".env", override=False)
 
     return LLMConfig(
-        base_url=os.getenv('SHOPKEEPER_BRAIN_LLM_BASE_URL'),
-        api_key=SecretStr(os.getenv('SHOPKEEPER_BRAIN_LLM_API_KEY',"")),
-        model=os.getenv('SHOPKEEPER_BRAIN_LLM_MODEL'),
+        base_url=os.getenv('LLM_BASE_URL'),
+        api_key=SecretStr(os.getenv('LLM_API_KEY',"")),
+        model=os.getenv('LLM_MODEL'),
         temperature=float(
-            os.getenv('SHOPKEEPER_BRAIN_LLM_TEMPERATURE', '0.1')
+            os.getenv('LLM_TEMPERATURE', '0.1')
         )
     )
 

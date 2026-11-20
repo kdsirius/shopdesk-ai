@@ -24,9 +24,9 @@
 
 ## 环境准备
 
-- Python 声明为 `>=3.11`，工程选择见 [.python-version](.python-version)。实际验收解释器与依赖版本记录在对应验收文档中。
-- 使用 uv 管理依赖，以 [pyproject.toml](pyproject.toml) 和 [uv.lock](uv.lock) 为准；默认 PyPI 源已配置为清华镜像。
-- 本地配置参考 [.env.example](.env.example)，在自己的 `.env` 或环境变量中填写；不把有效密钥写进源码、模板或文档。
+- 项目最低支持 Python 3.12，开发解释器由 [.python-version](.python-version) 固定到 3.12 系列。实际验收解释器与依赖版本见对应交付文档。
+- 使用 uv 管理依赖，以 [pyproject.toml](pyproject.toml) 和 [uv.lock](uv.lock) 为准；默认 PyPI 源已配置为清华镜像。Python 发行名和命令行入口均为 `shopdesk-ai`，导入包仍为 `app`。
+- 本地配置参考 [.env.example](.env.example)，按子系统命名，如 `LLM_API_KEY`、`MILVUS_URI`。从旧版升级时，只删除 `.env` 键名开头的 `SHOPKEEPER_BRAIN_`，保留原值；不把有效密钥写进源码、模板或文档。
 
 新环境同步依赖的操作模板如下，执行前按“未验证（未运行）”对待；安装完成只证明环境准备，业务通过仍以真实入口验证为准：
 
@@ -44,8 +44,9 @@ BGE-M3 的实际路线是 CPU/FP32，模型准备和配置见 [第 7 节教程](
 
 | 入口 | 内容 |
 | --- | --- |
-| [学习教程](docs/study/) | 按业务顺序交付的手敲教程；固定讲法参照 [第 6 节](docs/study/day06-主体识别.md) |
-| [学习进度](docs/memory/learning-progress.md) | 唯一章节状态源、提交基线与未验证项 |
+| [功能交付](docs/delivery/) | 各次功能迭代的改动、审阅入口和真实测试记录 |
+| [学习教程](docs/study/) | 16 节已完成的带练教程；固定讲法参照 [第 6 节](docs/study/day06-主体识别.md) |
+| [学习进度](docs/memory/learning-progress.md) | 带练章节状态、提交基线与未验证项 |
 | [教学偏好](docs/memory/teaching-preferences.md) | IDE 真实验证、不使用子 agent 等长期约定 |
 | [验收手册](docs/memory/verification-playbook.md) | AI 内部隔离验证与证据记录方式 |
 | [规则与设计](docs/superpowers/) | 已确认设计和执行计划；带日期的文件记录当时决策 |

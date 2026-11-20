@@ -3,9 +3,10 @@
 ## 已确认事实
 
 - 对外名称：**ShopDesk AI（商答台）**。GitHub 仓库：[kdsirius/shopdesk-ai](https://github.com/kdsirius/shopdesk-ai)，已由用户创建并推送，首次推送时为私有。
-- Python 发行名和 CLI：`shopkeeper-brain`
+- Python 发行名和 CLI：`shopdesk-ai`
 - Python 导入包：`app`（带练阶段为 `shopkeeper_brain`）
-- 配置前缀：`SHOPKEEPER_BRAIN_`
+- 开发解释器使用 Python 3.12，声明最低支持 3.12。
+- 本地配置键按子系统分组，如 `LLM_`、`BGE_` 和 `MILVUS_`，不再带 `SHOPKEEPER_BRAIN_` 项目前缀。
 - 参考项目：`reference/掌教智库/`
 - 视频资料：`reference/掌教智库/4.视频/day01` 至 `day16`
 - 包管理工具：`uv`
@@ -16,8 +17,8 @@
 
 ## 接手入口
 
-- 章节状态、提交基线和未验证项只读取 [学习进度](learning-progress.md)，不在本文件另维护进度副本。
-- 教学方式以 [文档区规则](../AGENTS.md)、[教学偏好](teaching-preferences.md) 和用户最新确认的 [第 6 节教程](../study/day06-主体识别.md) 为准；第 3 节作为补充样例。本项目不使用子 agent。
+- 最近已提交的功能迭代基线为 `f80a59d`（根目录 `app/` 迁移）；用户真实测试见[迁移交付](../delivery/2026-11-20-根目录应用包迁移.md)。本轮新发行名、Python 3.12 和配置切换见[升级交付](../delivery/2026-11-20-项目改名与Python312升级.md)，后续迭代从[功能交付](../delivery/)查改动与验收记录。
+- 带练章节状态、提交基线和留待验证事项见[学习进度](learning-progress.md)。维护历史教程时，以[文档区规则](../AGENTS.md)、[教学偏好](teaching-preferences.md)和[第 6 节教程](../study/day06-主体识别.md)为准；第 3 节作为补充样例。
 - 工程使用说明见根 [README](../../README.md)。答案生成、流式正文和配图回显见[第 16 节验收记录](day16-acceptance.md)。业务上传、查询进度和会话历史见[第 15 节验收记录](day15-acceptance.md)。FastAPI 输入校验和 SSE 见[第 14 节验收记录](day14-acceptance.md)与[备课记录](day14-preparation.md)。Web 服务骨架见 [第 13 节验收记录](day13-acceptance.md) 和 [第 13 节备课记录](day13-preparation.md)，融合与重排见 [第 12 节验收记录](day12-acceptance.md) 和 [第 12 节备课记录](day12-preparation.md)，HyDE 与联网搜索见 [第 11 节验收记录](day11-acceptance.md) 和 [第 11 节备课记录](day11-preparation.md)，向量检索见 [第 10 节验收记录](day10-acceptance.md) 和 [第 10 节备课记录](day10-preparation.md)，查询骨架与产品确认见 [第 9 节验收记录](day09-acceptance.md) 和 [第 9 节备课记录](day09-preparation.md)，两类集合与入库资料依据见 [第 8 节备课记录](day08-preparation.md)，向量资料错位见 [第 7 节备课记录](day07-preparation.md)。更早验收文件记录当时事实，不把其中“下一节”或环境限制直接当作当前状态。
 - 参考资料物理目录存在错位：`4.视频/day06/`仍是文档切片，主体识别和向量基础资料分布在 day07/day08。后续先读视频目录图片再定真实主题，不能仅按目录编号推断内容。
 - Web 服务由 [api/main.py](../../app/api/main.py) 启动。状态首页连接同源导入页与查询页：上传触发导入图，按任务 ID 轮询；查询用 `run_id` 收 SSE 进度、正文增量和完成结果，用 `session_id` 从 MongoDB 读回会话正文与配图。已有追问、拒答直接回显；确认产品后由答案节点消费重排资料并生成答案。各节点仍可通过学习期 `__main__` 单独验证，CLI 仍是脚手架问候。
@@ -83,7 +84,7 @@ flowchart LR
 
 ## 电商客服扩展（待讨论）
 
-当前从商品知识问答起步，订单查询、退换货和人工转接均未接入。首个客服场景先讨论可复用的导入、检索和会话能力，确认首版范围和验收标准后进入实现。
+当前从商品知识问答起步，订单查询、退换货和人工转接均未接入。MewHelp 已做只读摸底，用户暂缓借鉴；尚未确认下一个功能需求。
 
 ## 重要边界
 

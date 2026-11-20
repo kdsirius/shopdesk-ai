@@ -140,7 +140,7 @@ class NodeItemNameConfirm(NodeBase):
         if not collection_name:
             raise ConfigurationError(
                 "主体名称集合未配置，请检查 "
-                "SHOPKEEPER_BRAIN_MILVUS_ITEM_NAME_COLLECTION",
+                "MILVUS_ITEM_NAME_COLLECTION",
                 node_name=self.name,
             )
 

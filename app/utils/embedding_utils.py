@@ -27,7 +27,7 @@ def get_bge_m3_ef() -> BGEM3EmbeddingFunction:
             raise ConfigurationError(f"BGE-M3 模型文件缺失：{config.model_path / name}")
 
     if config.device == "cpu" and config.use_fp16:
-        raise ConfigurationError("本节 CPU 推理请配置 SHOPKEEPER_BRAIN_BGE_FP16=false")
+        raise ConfigurationError("本节 CPU 推理请配置 BGE_FP16=false")
 
     _bge_m3_ef = BGEM3EmbeddingFunction(
         model_name=str(config.model_path),
