@@ -40,7 +40,7 @@ ShopDesk AI 是面向电商客服的商品手册问答工具。把 PDF 或 Markd
 1. **拉取并安装。** 需要 Git、uv、仓库访问权限和已配置的 GitHub SSH 密钥。以下以 PowerShell 为例：
 
    ```powershell
-   git clone git@github.com:kdsirius/shopdesk-ai-.git shopdesk-ai
+   git clone git@github.com:kdsirius/shopdesk-ai.git shopdesk-ai
    cd shopdesk-ai
    uv sync --locked --python 3.12
    Copy-Item .env.example .env

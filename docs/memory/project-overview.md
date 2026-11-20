@@ -17,7 +17,8 @@
 
 ## 接手入口
 
-- 当前基线为 `e436cf4`。查询页采用雾蓝单列对话，首页与导入页统一样式，README 使用真实问答截图；用户实测通过查询和导入，见[雾蓝演示页交付](../delivery/2026-11-20-雾蓝演示页.md)。
+- 当前已验收、已推送基线为 `6d7097a`。在雾蓝界面上补齐拖拽选文件、按节点显示导入进度与计时、首页服务检查和回答配图放大。用户确认通过，见[演示交互优化交付](../delivery/2026-11-20-演示交互优化.md)。[README](../../README.md)收录三张项目图和导入、问答两张实测截图。后端接口与启动命令不变。
+- 上一轮 `e436cf4` 的查询页采用雾蓝单列对话，首页与导入页统一样式；用户实测通过查询和导入，见[雾蓝演示页交付](../delivery/2026-11-20-雾蓝演示页.md)。
 - 上一实现基线 `00a7fae` 将 Web 入口迁到 `app.main:app`，共享异常移到 `app.core.exceptions`，导入节点基类模块统一为 `base.py`。用户实测通过新入口、演示 SSE 和 RS-12 问答回显，见[包结构整理交付](../delivery/2026-11-20-包结构整理.md)。
 - 在 `00a7fae` 上进行的 [PDF Web 到入库与问答补测](2026-11-20-验收补测.md)已在短路径隔离副本通过。Windows 长路径和结构化图注问题已记录，未改应用代码。
 - 前一轮 `bc69434` 已验收，包含 `shopdesk-ai` 命名、Python 3.12 和配置键调整，见[升级交付](../delivery/2026-11-20-项目改名与Python312升级.md)。此前根目录 `app/` 迁移见[迁移交付](../delivery/2026-11-20-根目录应用包迁移.md)。后续迭代的改动和验收从[功能交付](../delivery/)查阅。
@@ -37,26 +38,7 @@
 
 ShopDesk AI 基于「掌柜智库」带练重建的手册问答链路。它把 PDF/Markdown 商品文档加工成可检索知识，再通过多路召回、融合、重排和大语言模型生成答案，并用 FastAPI/SSE 提供交互服务。
 
-```mermaid
-flowchart LR
-    A[PDF / Markdown] --> B[文档解析]
-    B --> C[图片处理]
-    C --> D[文档切片]
-    D --> E[主体识别]
-    E --> F[向量化]
-    F --> G[Milvus 入库]
-    G --> H[向量检索]
-    G --> I[HyDE 检索]
-    G --> J[网络搜索]
-    H --> K[RRF 融合]
-    I --> K
-    J --> K
-    K --> L[Rerank 重排]
-    L --> M[答案生成]
-    M --> N[FastAPI / SSE]
-```
-
-图中展示 16 节重建的主链路，查询的追问与拒答短路未画出。已验证的行为与未做的联调以学习进度和各节验收记录为准。
+参见 [README 业务全流程](../../README.md#业务全流程)和[系统架构](../../README.md#系统架构)。RRF 只融合普通向量检索和 HyDE 两路本地结果；Tavily 网页摘要在重排阶段加入。验收范围见学习进度和交付文档。
 
 ## 当前技术与参考目标
 
@@ -64,7 +46,7 @@ flowchart LR
 
 文本与视觉模型通过 OpenAI 兼容客户端连接，具体服务地址和模型名由本地配置决定；参考笔记中的 DashScope/Qwen 不是本工程唯一固定服务商。BGE-M3 当前按本地模型目录运行。
 
-第 9 节已落地查询流程骨架、产品确认和 MongoDB 会话历史（PyMongo，连接虚拟机 MongoDB，库 `kb001`、集合 `chat_message`，连接串只在本地 `.env`）。第 10 节落地了 `kb_chunks` 的 Dense + Sparse 混合检索（按已确认商品名过滤，`create_hybrid_search_requests` 带 `expr` 参数）。第 11 节落地了 HyDE 检索（文本模型写假设答案，与问题拼接后混合检索）和 Tavily 联网搜索（官方 `mcp` 包连 Tavily 远程 MCP 的 `tavily_search`，配置 `core/tavily_config.py`，密钥只在本地 `.env`，地址留空时用官方地址）；这两路运行期故障降级为空列表，向量检索主路仍异常外抛。第 12 节落地了 RRF 融合（向量检索与 HyDE 两路，k=60，联网搜索不参与）和重排（合并本地与联网结果，阿里云百炼 `qwen3-rerank`，通过 `dashscope` 包，配置 `core/rerank_config.py`，密钥只在本地 `.env`；断崖检测动态保留 3 到 10 条）；重排出错时降级为只保留本地结果、沿用 RRF 顺序。第 13 节用 FastAPI/Uvicorn 提供同源状态页和健康接口。第 14 节加入 Pydantic 输入校验与 SSE 练习，验证了浏览器逐条收流和完成后关闭。第 15 节接通业务上传、后台导入、进度轮询、查询 SSE 和历史读取。真实 Markdown 入库已自测，PDF Web 整链未运行。
+第 9 节已落地查询流程骨架、产品确认和 MongoDB 会话历史（PyMongo，连接虚拟机 MongoDB，库 `kb001`、集合 `chat_message`，连接串只在本地 `.env`）。第 10 节落地了 `kb_chunks` 的 Dense + Sparse 混合检索（按已确认商品名过滤，`create_hybrid_search_requests` 带 `expr` 参数）。第 11 节落地了 HyDE 检索（文本模型写假设答案，与问题拼接后混合检索）和 Tavily 联网搜索（官方 `mcp` 包连 Tavily 远程 MCP 的 `tavily_search`，配置 `core/tavily_config.py`，密钥只在本地 `.env`，地址留空时用官方地址）；这两路运行期故障降级为空列表，向量检索主路仍异常外抛。第 12 节落地了 RRF 融合（向量检索与 HyDE 两路，k=60，联网搜索不参与）和重排（合并本地与联网结果，阿里云百炼 `qwen3-rerank`，通过 `dashscope` 包，配置 `core/rerank_config.py`，密钥只在本地 `.env`；断崖检测动态保留 3 到 10 条）；重排出错时降级为只保留本地结果、沿用 RRF 顺序。第 13 节用 FastAPI/Uvicorn 提供同源状态页和健康接口。第 14 节加入 Pydantic 输入校验与 SSE 练习，验证了浏览器逐条收流和完成后关闭。第 15 节接通业务上传、后台导入、进度轮询、查询 SSE 和历史读取。该节验证了真实 Markdown 入库，PDF Web 整链在后续[验收补测](2026-11-20-验收补测.md)中通过。
 
 第 16 节接通答案生成及回显。LangGraph 的 `updates` 和 `custom` 分别提供节点更新和正文增量，查询服务转为 `progress` 和 `delta`；成功写入助手历史后发送带完整答案和配图的 `complete`，异常时以 `task_error` 结束。任务与 SSE 队列在单进程内存中，MongoDB 持久化历史，查询页刷新时读回最近 5 条。
 
