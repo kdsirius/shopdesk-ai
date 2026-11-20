@@ -13,8 +13,8 @@
 | 参考项目 | `reference/掌教智库/` |
 | 环境与构建 | Python 声明 `>=3.11`，工程选择 3.11；最近实际验收为 CPython 3.11.15。按锁文件在 workspace 副本同步与编译，方法见 [验收手册](verification-playbook.md) |
 | 验证方式 | 当前无项目 pytest 套件；使用 IDE 学习入口、真实输入与隔离行为探针，不把探针项数当测试条数 |
-| 已核对提交 | 第 8 节为 `29d2830`；第 9 节代码为 `3552bc9`，教程与验收文档为 `99105f0`（用户提交时 `-m` 引号写进了标题，不影响内容）。其后的包名路径同步与记忆收尾以实际 Git 日志为准；第 10 节代码为 `0bb821b`，教程与验收文档为 `6b157d8`；第 11 节代码为 `c65801b`，教程与验收文档为 `2578de1`；第 12 节代码为 `508d36e`，教程与验收文档为 `bc5e80f`。第 13 节代码、教程与验收文档为 `e3ff008`。第 14 节代码、教程与验收文档为 `62636d8`；第 15 节为 `1404667` |
-| 最近实测基线 | 第 15 节用户自测真实 Markdown 导入及两个查询分支；实际源码通过隔离 HTTP 和首页导航复验。证据见[第 15 节验收](day15-acceptance.md)；教程副本的独立浏览器实测见[备课记录](day15-preparation.md) |
+| 已核对提交 | 第 8 节为 `29d2830`；第 9 节代码为 `3552bc9`，教程与验收文档为 `99105f0`（用户提交时 `-m` 引号写进了标题，不影响内容）。其后的包名路径同步与记忆收尾以实际 Git 日志为准；第 10 节代码为 `0bb821b`，教程与验收文档为 `6b157d8`；第 11 节代码为 `c65801b`，教程与验收文档为 `2578de1`；第 12 节代码为 `508d36e`，教程与验收文档为 `bc5e80f`。第 13 节代码、教程与验收文档为 `e3ff008`。第 14 节代码、教程与验收文档为 `62636d8`；第 15 节为 `1404667`；第 16 节源码与教程为 `e839494` |
+| 最近实测基线 | 第 16 节实际源码通过同步查询、浏览器 SSE、MongoDB 历史、节点进度复验及 wheel 构建；提交与复验源码一致。见[第 16 节验收](day16-acceptance.md) |
 
 ## 章节表
 
@@ -35,11 +35,11 @@
 | 13 | Web 服务骨架 | 已通过 | 2026-11-18 | 无自动化测试 | 用户浏览器自测及真实源码隔离 HTTP 验收通过，代码和文档已提交（`e3ff008`）。资料对应 day13 的 HTML/CSS/JavaScript 入门与 day14 的服务启动部分，详见 [验收记录](day13-acceptance.md)、[备课记录](day13-preparation.md) |
 | 14 | FastAPI 与 SSE | 已通过 | 2026-11-18 | 无自动化测试 | 用户已自测。实际源码的健康检查、输入校验、逐条收流和完成后关闭均通过，提交为 `62636d8`。见[验收记录](day14-acceptance.md)、[备课记录](day14-preparation.md) |
 | 15 | API、前端与流式交互 | 已通过 | 2026-11-19 | 无自动化测试 | 用户完成真实 Markdown 导入和两查询分支自测；用户实际源码隔离检查通过，补齐首页导航后定向复验通过，提交为 `1404667`。见[验收记录](day15-acceptance.md)和[备课记录](day15-preparation.md) |
-| 16 | 答案输出与项目收敛 | 编写中 |  | 无自动化测试 | [教程](../study/day16-答案输出与项目收敛.md)已交付，隔离副本通过同步、浏览器 SSE 与 MongoDB 联调，待用户手敲和自测。见[备课记录](day16-preparation.md) |
+| 16 | 答案输出与项目收敛 | 已通过 | 2026-11-20 | 无自动化测试 | 实际源码验收通过，查询页进度和 wheel 构建修订后复验通过；源码与教程提交为 `e839494`。见[验收记录](day16-acceptance.md)和[备课记录](day16-preparation.md) |
 
 ## 历史验收与资料记录
 
-以下按当时的验收轮次保留；其中“本轮”“当前环境”等只指相应历史时点。当前提交与下一节操作以本文件开头和接手门槛为准，详细错误与复验依据见各节记录。
+以下按当时的验收轮次保留；其中“本轮”“当前环境”等只指相应历史时点。当前提交与后续接手以本文件开头和接手入口为准，详细错误与复验依据见各节记录。
 
 - 第 1 节三个基础模块已通过真实命令验证；历史验收中的破坏性实验由 AI 在隔离副本完成。
 - 第 2 节已完成真实代码验收：入口节点、PDF/Markdown 分支、异常上下文、状态复用和 BaseNode 异常链均通过；历史破坏性实验由 AI 在隔离副本完成。
@@ -98,25 +98,24 @@
 
 | 欠账 | 来源章节 | 为什么还没做 |
 | --- | --- | --- |
-| 答案输出与页面展示 | 16 | `node_answer_output` 原样透传状态；查询页只展示进度、重排条数和已有历史，尚无生成式答案 |
 | PDF Web 导入整链 | 11、15 | 第 15 节已补齐导入主图并验证真实 Markdown 到 Milvus；浏览器上传 PDF 经 MinerU、图片处理到入库的整条链路未运行 |
+| 查询流的外部验证边界 | 16 | 助手历史写入失败已在隔离副本验证；真实外部服务中途掉线、联网直链图片加载未运行 |
 | 第 3 节 MinerU 异常边界 | 03 | 已验证一个真实 PDF 的成功链路；长时间超时、网络中断、损坏 ZIP、缺少 full.md 和更多加密 PDF 兼容性未单独验证 |
 | 第 3 节 Python 3.11 真实外部链路 | 03 | 第 3 节当时的完整 MinerU 隔离运行使用 3.12.9；后续 3.11.15 的编译与 BGE 验证不等于在 3.11 重新请求 MinerU |
 
 第 4 节的真实视觉模型、MinIO 上传与访问、第 6 节的真实文本模型日志、第 7 节的本地 BGE 编码均已有验收证据，不再笼统列为“模型或 MinIO 未验证”。这不代表本轮重新检查了服务的当前在线状态。未设置项目 pytest 套件属于当前验证约定，不作为待补功能。
 
-## 下一节接手门槛
+## 项目收敛与后续接手
 
-- 先执行只读 `git status --short` 和 `git log -5 --oneline`，保留已有改动。读取根、文档区和参考区规则、README、项目概览、教学偏好、本进度及[第 15 节验收记录](day15-acceptance.md)、[备课记录](day15-preparation.md)。固定教学样例仍是第 6 节。所有工作在当前会话完成。
-- 第 15 节基线为 `1404667`。核对真实[答案节点](../../src/shopkeeper_brain/processor/query_processor/nodes/node_answer_output.py)、[查询主图](../../src/shopkeeper_brain/processor/query_processor/main_graph.py)、[查询服务](../../src/shopkeeper_brain/services/query_service.py)、[业务 API](../../src/shopkeeper_brain/api/business.py)、[查询页](../../src/shopkeeper_brain/front/chat.html)和 [MongoDB 历史工具](../../src/shopkeeper_brain/utils/mongo_history_utils.py)。`session_id` 用于历史，`run_id` 用于一次性 SSE 订阅；业务流有 `progress`、`complete` 和 `task_error`。当前真实历史接口返回最近 5 条，不能把教程示例的 50 当成已实现。
-- 第 16 节已按资料优先级摸底并经用户确认范围，[教程](../study/day16-答案输出与项目收敛.md)和[备课实测](day16-preparation.md)已交付。用户按教程手敲并自测后，再读取实际改动、复制实际源码到隔离副本，验收同步节点、追问和拒答、SSE 正文与 MongoDB 历史，不用教程副本结果代替用户源码结果。
-- 第 12 节结果：`node_rrf` 返回 `rrf_chunks`（`entity` 字典列表，含 `chunk_id`、`content`、`item_name`，不含分数），`node_rerank` 返回 `reranked_docs`（元素 `{content, title, chunk_id, url, source, score}`，`source` 为 `local` 或 `web`，3 到 10 条；重排失败降级时只含本地结果且 `score` 为 `None`）。答案输出节点要读取 `reranked_docs`，并同时处理 `score` 为 `None` 和联网结果有 `url` 的情况。重排依赖 `dashscope`，配置变量 `SHOPKEEPER_BRAIN_RERANK_*`，密钥只在本地 `.env`。
+- 16 节带练范围已验收完成，不再安排下一节。后续接手先只读核对 Git 状态和提交，保留已有改动；从 [README](../../README.md)、[项目概览](project-overview.md)和[第 16 节验收记录](day16-acceptance.md)了解现状，未验证行为以本页欠账为准。
+- 查询闭环的基线为 `e839494`。入口及追踪见[查询主图](../../src/shopkeeper_brain/processor/query_processor/main_graph.py)、[答案节点](../../src/shopkeeper_brain/processor/query_processor/nodes/node_answer_output.py)、[查询服务](../../src/shopkeeper_brain/services/query_service.py)、[业务 API](../../src/shopkeeper_brain/api/business.py)和[查询页](../../src/shopkeeper_brain/front/chat.html)。`run_id` 用于一次性 SSE 订阅，成功流用 `progress`、`delta` 和 `complete`，失败终态为 `task_error`；`session_id` 用于 [MongoDB 历史](../../src/shopkeeper_brain/utils/mongo_history_utils.py)，接口返回最近 5 条，正文与配图一起读回。
+- 第 12 节结果：`node_rrf` 返回 `rrf_chunks`（`entity` 字典列表，含 `chunk_id`、`content`、`item_name`，不含分数），`node_rerank` 返回 `reranked_docs`（元素 `{content, title, chunk_id, url, source, score}`，`source` 为 `local` 或 `web`，3 到 10 条；重排失败降级时只含本地结果且 `score` 为 `None`）。答案输出节点读取 `reranked_docs`，并兼容 `score=None` 与联网结果的 `url`。重排依赖 `dashscope`，配置变量 `SHOPKEEPER_BRAIN_RERANK_*`，密钥只在本地 `.env`。
 - 第 11 节结果：`node_search_embedding_hyde` 返回 `hyde_embedding_chunks`，`node_web_search_mcp` 返回 `web_search_docs`（元素是 `{title, url, snippet}`，`snippet` 已截断到 500 字，来自 Tavily 的 `content`）；两路运行期故障返回空列表，所以后面的 RRF 和 Rerank 必须能处理这两个字段为空的情况。向量检索与 HyDE 的元素保持 PyMilvus 原形状（`chunk_id`、`distance`、`entity`）。联网搜索的相关性有浮动，会混入无关页面，交给重排处理。Tavily 密钥只在本地 `.env`，依赖已新增 `mcp`；`mcp 2.3.0` 的客户端接口是新版（`Client`、`is_error`、`httpx2`），与网上多数 1.x 示例不同。
 - 第 9 节结果：查询骨架在 `processor/query_processor/`（`main_graph.py` 在该目录，节点在 `nodes/`），导入包已由用户改名为 `import_processor`，后续教程和验收以真实包名为准。产品确认只查 `kb_item_names`，第 10 节才检索 `kb_chunks` 正文；三个并行检索节点只返回各自字段；正文检索从第 10 节起支持商品过滤。
 - 第 8 节正式数据源为 Milvus 的 `kb_item_names` 和 `kb_chunks`：验收时分别有 `RS PRO RS-12 数字万用表` 的 1 条主体记录和 21 条 Chunk。名称主键为 `pk`，Chunk 主键为 `chunk_id`。保留的 `verify_d08_b5001e7810_*` 集合仅供实验，不能用于产品确认或正文查询。
 - 第 7 节 `workspace/day07-real-run/state_vector.json` 仍是向量备份，Sparse 键是字符串且没有第 8 节回填的 `chunk_id`；原 `chunks.json` 也不是可替代的查询输入。后续从数据库读取真实主键，不为接手重新解析、识别、向量化或导入前八节。
 - Milvus 在虚拟机 `192.168.150.120:19530`，验收版本为服务端 2.5.5、PyMilvus 3.0.3、pymilvus-model 0.3.4；本地 BGE-M3 为 CPU/FP32。开始前只读核对当前连接、配置和集合，不能把历史在线记录当作当前在线，更不能重建或清空服务。任何必要数据库写入都须明确实验范围。MongoDB 在虚拟机 `192.168.150.120:27017`（容器 `my-mongo`，镜像 `mongo:7.0`，root 用户 `admin`，已启用密码）；密码只在用户本地 `.env`，不得写入仓库文档或日志，验证时用环境变量传入，写入只限实验会话。
-- 导入主图已接到 Web 上传、后台任务和状态轮询，CLI 仍是脚手架问候。无需为第 16 节接手重跑导入；自测的 `study_d15_*` 和教程隔离验证的 `verify_d15_*` 不当作正式数据。查询已经可经 Web 执行到 Rerank；答案节点不清空已有追问或拒答，只将状态原样返回。
+- 导入主图已接到 Web 上传、后台任务和状态轮询，CLI 仍是脚手架问候。复验查询可只读复用已入库的真实手册，不必重跑导入；`study_d15_*`、`verify_d15_*` 及第 16 节验证历史库均是实验数据，不当作正式数据。
 - 导入包已改名为 `import_processor`，2026-11-17 已把前九节教程、计划、设计和验收记录中的包路径同步为新名称，只改路径文字，没有改其他内容；以后路径以真实源码为准。
 - 教程保持三块正文、代码旁短讲、图后白话和 IDE/学习期 `__main__` 真实验证；除包路径同步外不回改已通过教程，不代写 `src/`。Git 只读，依赖使用 uv 与清华源，临时文件统一放 `workspace/`，无法运行的项目如实标记。
 
@@ -128,3 +127,4 @@
 | 第 6 节消息文本提取与缺失密钥兜底 | 2026-11-15 |
 | 第 8 节主体保存接线、插入结果判断与异常包装 | 2026-11-16 |
 | 第 9 节真实 MongoDB 与文本模型联调 | 2026-11-17 |
+| 第 16 节答案输出与页面展示 | 2026-11-20 |
