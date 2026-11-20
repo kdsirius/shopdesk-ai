@@ -2,71 +2,189 @@
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ShopDesk AI（商答台） · 查询手册</title>
+    <style>
+        :root { color-scheme: light; font: 16px/1.6 "Microsoft YaHei", "PingFang SC", sans-serif; color: #202c3a; background: #fafbfd; }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100dvh; display: flex; flex-direction: column; background: radial-gradient(ellipse 44rem 25rem at 50% 2rem, #e5f0fc, transparent 100%); }
+        header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px 20px; padding: 12px clamp(16px, 4vw, 48px); border-bottom: 1px solid #e2eaf3; background: #fafbfdcc; }
+        a { color: inherit; text-decoration: none; }
+        .brand { font-weight: 750; letter-spacing: -.02em; }
+        .brand span { color: #52677b; margin-inline-start: 8px; font-size: .88rem; font-weight: 400; }
+        nav { display: flex; gap: 4px; }
+        nav a { padding: 8px 12px; border-radius: 999px; font-size: .88rem; }
+        nav a[aria-current], nav a:hover { background: #e5effa; color: #21476e; }
+        main { flex: 1; width: min(100% - 32px, 760px); margin: 0 auto; display: flex; flex-direction: column; }
+        #thread { flex: 1; padding: clamp(24px, 5vh, 48px) 0 20px; }
+        .welcome { margin: clamp(24px, 14vh, 140px) auto 0; text-align: center; color: #52677b; }
+        .welcome h1 { margin: 0 0 .55rem; color: #233548; font-size: clamp(1.65rem, 4vw, 2.35rem); font-weight: 550; }
+        .message { overflow-wrap: anywhere; }
+        .message + .message { margin-top: 24px; }
+        .user { width: fit-content; max-width: min(88%, 620px); margin-inline-start: auto; padding: 10px 16px; border-radius: 22px 22px 6px 22px; background: #e3effc; }
+        .user .body, .plain { white-space: pre-wrap; }
+        .assistant { padding-inline-start: 18px; }
+        .author { position: relative; margin: 0 0 3px; font-size: .92rem; font-weight: 750; }
+        .author::before { position: absolute; content: ""; width: 8px; height: 8px; left: -18px; top: .55em; border-radius: 50%; background: #78a7d4; }
+        .status, #history-note { margin: 0 0 8px; font-size: .82rem; color: #52677b; }
+        .status:empty, #history-note:empty, .images:empty { display: none; }
+        .body p, .body ol, .body ul { margin: 6px 0; }
+        .body h2 { margin: 8px 0; font-size: 1.12rem; }
+        .body ol, .body ul { padding-inline-start: 1.5em; }
+        .images { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 14px 0 0; }
+        .images figcaption { grid-column: 1 / -1; font-size: .82rem; color: #52677b; }
+        .images img { width: 100%; height: 124px; object-fit: contain; padding: 6px; border: 1px solid #e3eaf2; border-radius: 12px; background: #fff; }
+        form { position: sticky; bottom: 0; display: flex; align-items: center; gap: 8px; padding: 9px 12px 9px 18px; margin-bottom: 18px; border: 1px solid #d9e4f0; border-radius: 28px; background: #fff; box-shadow: 0 5px 20px #22405c12; }
+        input, button { font: inherit; }
+        input { flex: 1; min-width: 0; min-height: 44px; border: 0; border-radius: 8px; padding: 0 8px; color: inherit; background: transparent; }
+        input::placeholder { color: #62768a; }
+        button { width: 44px; height: 44px; flex-shrink: 0; border: 0; border-radius: 50%; background: #224565; color: #fff; cursor: pointer; font-size: 1.3rem; }
+        button:hover:not(:disabled) { background: #17354f; }
+        button:disabled { opacity: .48; cursor: default; }
+        :focus-visible { outline: 2px solid #346faf; outline-offset: 3px; }
+        @media (max-width: 560px) { .images { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    </style>
 </head>
 <body>
-    <nav><a href="/">状态页</a> · <a href="/import.html">导入手册</a></nav>
-    <h1>查询手册</h1>
-    <form id="query-form">
-        <label>问题 <input id="question" size="42" required></label>
-        <button type="submit">发送</button>
-    </form>
-    <pre id="query-progress" aria-live="polite">等待提问</pre>
-    <h2>本轮回答</h2>
-    <pre id="answer" style="white-space: pre-wrap;"></pre>
-    <div id="answer-images"></div>
-    <h2>会话历史</h2>
-    <ol id="history"></ol>
-    <p id="history-note" aria-live="polite"></p>
+    <header>
+        <a class="brand" href="/">ShopDesk AI <span>商答台</span></a>
+        <nav aria-label="主导航"><a href="/chat.html" aria-current="page">手册问答</a><a href="/import.html">导入手册</a></nav>
+    </header>
+    <main>
+        <section id="thread" aria-label="会话">
+            <div class="welcome"><h1>想查哪款商品的手册？</h1><p>输入完整型号和问题，例如「RS PRO RS-12 怎么测交流电压？」</p></div>
+            <p id="history-note" role="status"></p>
+        </section>
+        <form id="query-form">
+            <input id="question" aria-label="商品型号和问题" placeholder="输入商品型号和问题" required>
+            <button type="submit" aria-label="发送" title="发送" disabled>↑</button>
+        </form>
+    </main>
     <script>
         const form = document.getElementById("query-form");
         const button = form.querySelector("button");
         const question = document.getElementById("question");
-        const progress = document.getElementById("query-progress");
-        const answer = document.getElementById("answer");
-        const answerImages = document.getElementById("answer-images");
-        const history = document.getElementById("history");
-        const historyNote = document.getElementById("history-note");
+        const thread = document.getElementById("thread");
         const sessionId = sessionStorage.getItem("shopkeeper-session") || crypto.randomUUID();
         sessionStorage.setItem("shopkeeper-session", sessionId);
+        const stages = {
+            node_item_name_confirm: "正在确认商品型号…",
+            node_search_embedding: "正在检索资料…",
+            node_search_embedding_hyde: "正在检索资料…",
+            node_web_search_mcp: "正在检索资料…",
+            node_rrf: "正在整理资料…",
+            node_rerank: "正在筛选相关资料…",
+            node_answer_output: "正在生成回答…",
+        };
+
+        function appendMessage(role) {
+            thread.querySelector(".welcome")?.remove();
+            const row = document.createElement("article");
+            row.className = `message ${role === "user" ? "user" : "assistant"}`;
+            const status = document.createElement("p");
+            status.className = "status";
+            status.setAttribute("role", "status");
+            const body = document.createElement("div");
+            body.className = "body";
+            const images = document.createElement("figure");
+            images.className = "images";
+            if (role === "user") {
+                row.setAttribute("aria-label", "我");
+                row.append(body);
+            } else {
+                const author = document.createElement("p");
+                author.className = "author";
+                author.textContent = "商答台";
+                row.append(author, status, body, images);
+            }
+            thread.append(row);
+            return { row, status, body, images };
+        }
+
+        function renderAnswer(body, text) {
+            body.replaceChildren();
+            let list;
+            for (const line of text.split(/\r?\n/)) {
+                const match = line.match(/^\s*(?:(\d+)\. |([-*]) )(.*)$/);
+                const heading = line.match(/^#{1,6}\s+(.+)$/);
+                if (!match) list = null;
+                if (!line.trim()) continue;
+                const block = document.createElement(match ? "li" : heading ? "h2" : "p");
+                const content = match ? match[3] : heading ? heading[1] : line;
+                content.split(/\*\*([^*]+)\*\*/g).forEach((part, index) => {
+                    if (index % 2 === 0) block.append(part);
+                    else {
+                        const strong = document.createElement("strong");
+                        strong.textContent = part;
+                        block.append(strong);
+                    }
+                });
+                if (match) {
+                    const tag = match[1] ? "OL" : "UL";
+                    if (list?.tagName !== tag) {
+                        list = document.createElement(tag);
+                        if (tag === "OL") list.start = Number(match[1]);
+                        body.append(list);
+                    }
+                    list.append(block);
+                } else body.append(block);
+            }
+        }
 
         function renderImages(container, urls) {
-            container.replaceChildren(...(urls ?? []).map(url => {
+            if (!urls?.length) return;
+            const caption = document.createElement("figcaption");
+            caption.textContent = "参考配图";
+            container.append(caption);
+            for (const url of urls) {
                 const image = document.createElement("img");
                 image.src = url;
                 image.alt = "参考图片";
-                image.style.maxWidth = "min(100%, 360px)";
-                return image;
-            }));
+                container.append(image);
+            }
         }
 
         async function loadHistory() {
             try {
                 const response = await fetch(`/history/${sessionId}`);
-                if (!response.ok) throw new Error(`历史 HTTP ${response.status}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const { items } = await response.json();
-                history.replaceChildren(...items.map(item => {
-                    const line = document.createElement("li");
-                    line.textContent = `${item.role === "user" ? "我" : "助手"}：${item.text}`;
-                    const images = document.createElement("div");
-                    renderImages(images, item.image_urls);
-                    line.append(images);
-                    return line;
-                }));
-                historyNote.textContent = items.length ? "" : "当前会话暂无记录。";
+                for (const item of items) {
+                    const { body, images } = appendMessage(item.role);
+                    if (item.role === "user") body.textContent = item.text;
+                    else {
+                        renderAnswer(body, item.text);
+                        renderImages(images, item.image_urls);
+                    }
+                }
             } catch (error) {
-                historyNote.textContent = `读取历史失败：${error.message}`;
+                document.getElementById("history-note").textContent = `读取历史失败：${error.message}`;
+            } finally {
+                button.disabled = false;
             }
         }
 
         form.addEventListener("submit", async (event) => {
             event.preventDefault();
             const text = question.value.trim();
-            if (!text) return;
+            if (!text || button.disabled) return;
             button.disabled = true;
-            answer.textContent = "";
-            answerImages.replaceChildren();
-            progress.textContent = "正在提交…\n";
+            question.value = "";
+            const user = appendMessage("user");
+            user.body.textContent = text;
+            const { status, body, images } = appendMessage("assistant");
+            status.textContent = "正在提交…";
+            user.row.scrollIntoView({ block: "nearest" });
+            let source;
+            const finish = (message) => {
+                source?.close();
+                status.textContent = message;
+                button.disabled = false;
+            };
+            const fail = (message) => {
+                body.textContent = "";
+                finish(message);
+            };
             try {
                 const response = await fetch("/query", {
                     method: "POST",
@@ -75,39 +193,25 @@
                 });
                 if (!response.ok) throw new Error(`查询 HTTP ${response.status}`);
                 const { run_id } = await response.json();
-                const source = new EventSource(`/stream/${run_id}`);
-                async function finish(message) {
-                    source.close();
-                    progress.textContent += message;
-                    await loadHistory();
-                    button.disabled = false;
-                }
+                source = new EventSource(`/stream/${run_id}`);
                 source.addEventListener("progress", (event) => {
-                    progress.textContent += `${JSON.parse(event.data).node}\n`;
+                    status.textContent = stages[JSON.parse(event.data).node] || "正在处理…";
                 });
+                body.classList.add("plain");
                 source.addEventListener("delta", (event) => {
-                    answer.textContent += JSON.parse(event.data).delta;
+                    body.textContent += JSON.parse(event.data).delta;
                 });
                 source.addEventListener("complete", (event) => {
                     const result = JSON.parse(event.data);
-                    answer.textContent = result.answer;
-                    renderImages(answerImages, result.image_urls);
-                    const detail = result.reranked_count === null
-                        ? "未进入检索分支"
-                        : `重排保留 ${result.reranked_count} 条资料`;
-                    finish(`查询完成，${detail}。`);
+                    body.classList.remove("plain");
+                    renderAnswer(body, result.answer);
+                    renderImages(images, result.image_urls);
+                    finish(result.reranked_count === null ? "" : `查询完成 · 重排保留 ${result.reranked_count} 条资料`);
                 });
-                source.addEventListener("task_error", (event) => {
-                    answer.textContent = "";
-                    finish(JSON.parse(event.data).message);
-                });
-                source.onerror = () => {
-                    answer.textContent = "";
-                    finish("进度连接中断。");
-                };
+                source.addEventListener("task_error", (event) => fail(JSON.parse(event.data).message));
+                source.onerror = () => fail("进度连接中断，请重试。");
             } catch (error) {
-                progress.textContent += error.message;
-                button.disabled = false;
+                fail(error.message);
             }
         });
         loadHistory();

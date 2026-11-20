@@ -18,6 +18,7 @@
 ## 接手入口
 
 - 当前基线为 `00a7fae`。包结构整理将 Web 入口迁到 `app.main:app`，共享异常移到 `app.core.exceptions`，导入节点基类模块统一为 `base.py`。用户实测通过新入口、演示 SSE 和 RS-12 问答回显，见[包结构整理交付](../delivery/2026-11-20-包结构整理.md)。
+- 当前基线的 [PDF Web 到入库与问答补测](2026-11-20-验收补测.md)已在短路径隔离副本通过。Windows 长路径和结构化图注问题已记录，未改应用代码。
 - 前一轮 `bc69434` 已验收，包含 `shopdesk-ai` 命名、Python 3.12 和配置键调整，见[升级交付](../delivery/2026-11-20-项目改名与Python312升级.md)。此前根目录 `app/` 迁移见[迁移交付](../delivery/2026-11-20-根目录应用包迁移.md)。后续迭代的改动和验收从[功能交付](../delivery/)查阅。
 - 带练章节状态、提交基线和留待验证事项见[学习进度](learning-progress.md)。维护历史教程时，以[文档区规则](../AGENTS.md)、[教学偏好](teaching-preferences.md)和[第 6 节教程](../study/day06-主体识别.md)为准；第 3 节作为补充样例。
 - 工程使用说明见根 [README](../../README.md)。答案生成、流式正文和配图回显见[第 16 节验收记录](day16-acceptance.md)。业务上传、查询进度和会话历史见[第 15 节验收记录](day15-acceptance.md)。FastAPI 输入校验和 SSE 见[第 14 节验收记录](day14-acceptance.md)与[备课记录](day14-preparation.md)。Web 服务骨架见 [第 13 节验收记录](day13-acceptance.md) 和 [第 13 节备课记录](day13-preparation.md)，融合与重排见 [第 12 节验收记录](day12-acceptance.md) 和 [第 12 节备课记录](day12-preparation.md)，HyDE 与联网搜索见 [第 11 节验收记录](day11-acceptance.md) 和 [第 11 节备课记录](day11-preparation.md)，向量检索见 [第 10 节验收记录](day10-acceptance.md) 和 [第 10 节备课记录](day10-preparation.md)，查询骨架与产品确认见 [第 9 节验收记录](day09-acceptance.md) 和 [第 9 节备课记录](day09-preparation.md)，两类集合与入库资料依据见 [第 8 节备课记录](day08-preparation.md)，向量资料错位见 [第 7 节备课记录](day07-preparation.md)。更早验收文件记录当时事实，不把其中“下一节”或环境限制直接当作当前状态。
@@ -82,6 +83,12 @@ flowchart LR
 | [front/](../../app/front/) | 同源状态页、SSE 练习页、导入页和查询页 |
 
 当前业务调用方向为 `api → services → processor`，前端通过同源 API 访问业务。共享配置和工具位于 `core`、`utils`。
+
+## 待讨论的工程事项
+
+- **重复导入与数据一致性。** 当前用不带扩展名的 `file_title` 识别替换范围，商品名称先于正文向量化和切片写入，两个集合各自先删后插。讨论时先确定同名文件如何区分，以及更新失败后旧手册是否必须继续可查。见[导入主图](../../app/processor/import_processor/main_graph.py#L35)和[正文写入](../../app/processor/import_processor/nodes/node_import_milvus.py#L183)。
+- **任务生命周期。** SSE 仅能订阅一次，待订阅队列和导入状态保存在进程内存中，当前没有到期清理。先按使用场景决定是否需要处理断线、超时和清理。涉及多人使用时再讨论会话访问和上传边界。见[查询与 SSE 路由](../../app/api/business.py#L54)和[导入任务状态](../../app/services/import_service.py#L13)。
+- **正文检索的共享配置。** 普通检索与 HyDE 分别维护 Milvus 返回字段、权重和结果数量。下一次需要调整正文检索时，再考虑共用这段查询；保留各自的查询文本生成和故障处理。见[普通检索](../../app/processor/query_processor/nodes/node_search_embedding.py#L20)和[HyDE 检索](../../app/processor/query_processor/nodes/node_search_embedding_hyde.py#L79)。
 
 ## 电商客服扩展（待讨论）
 
