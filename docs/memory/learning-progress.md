@@ -108,7 +108,7 @@
 ## 项目收敛与后续接手
 
 - 16 节带练范围已验收完成，不再安排新教程。后续按 ShopDesk AI 的电商客服方向讨论扩展，不预设实现方案。接手先只读核对 Git 状态和提交，保留已有改动；从 [README](../../README.md)、[项目概览](project-overview.md)和[第 16 节验收记录](day16-acceptance.md)了解现状，未验证行为以本页欠账为准。
-- 查询闭环的基线为 `e839494`。入口及追踪见[查询主图](../../src/shopkeeper_brain/processor/query_processor/main_graph.py)、[答案节点](../../src/shopkeeper_brain/processor/query_processor/nodes/node_answer_output.py)、[查询服务](../../src/shopkeeper_brain/services/query_service.py)、[业务 API](../../src/shopkeeper_brain/api/business.py)和[查询页](../../src/shopkeeper_brain/front/chat.html)。`run_id` 用于一次性 SSE 订阅，成功流用 `progress`、`delta` 和 `complete`，失败终态为 `task_error`；`session_id` 用于 [MongoDB 历史](../../src/shopkeeper_brain/utils/mongo_history_utils.py)，接口返回最近 5 条，正文与配图一起读回。
+- 查询闭环的带练基线为 `e839494`。当前入口及追踪见[查询主图](../../app/processor/query_processor/main_graph.py)、[答案节点](../../app/processor/query_processor/nodes/node_answer_output.py)、[查询服务](../../app/services/query_service.py)、[业务 API](../../app/api/business.py)和[查询页](../../app/front/chat.html)。`run_id` 用于一次性 SSE 订阅，成功流用 `progress`、`delta` 和 `complete`，失败终态为 `task_error`；`session_id` 用于 [MongoDB 历史](../../app/utils/mongo_history_utils.py)，接口返回最近 5 条，正文与配图一起读回。
 - 第 12 节结果：`node_rrf` 返回 `rrf_chunks`（`entity` 字典列表，含 `chunk_id`、`content`、`item_name`，不含分数），`node_rerank` 返回 `reranked_docs`（元素 `{content, title, chunk_id, url, source, score}`，`source` 为 `local` 或 `web`，3 到 10 条；重排失败降级时只含本地结果且 `score` 为 `None`）。答案输出节点读取 `reranked_docs`，并兼容 `score=None` 与联网结果的 `url`。重排依赖 `dashscope`，配置变量 `SHOPKEEPER_BRAIN_RERANK_*`，密钥只在本地 `.env`。
 - 第 11 节结果：`node_search_embedding_hyde` 返回 `hyde_embedding_chunks`，`node_web_search_mcp` 返回 `web_search_docs`（元素是 `{title, url, snippet}`，`snippet` 已截断到 500 字，来自 Tavily 的 `content`）；两路运行期故障返回空列表，所以后面的 RRF 和 Rerank 必须能处理这两个字段为空的情况。向量检索与 HyDE 的元素保持 PyMilvus 原形状（`chunk_id`、`distance`、`entity`）。联网搜索的相关性有浮动，会混入无关页面，交给重排处理。Tavily 密钥只在本地 `.env`，依赖已新增 `mcp`；`mcp 2.3.0` 的客户端接口是新版（`Client`、`is_error`、`httpx2`），与网上多数 1.x 示例不同。
 - 第 9 节结果：查询骨架在 `processor/query_processor/`（`main_graph.py` 在该目录，节点在 `nodes/`），导入包已由用户改名为 `import_processor`，后续教程和验收以真实包名为准。产品确认只查 `kb_item_names`，第 10 节才检索 `kb_chunks` 正文；三个并行检索节点只返回各自字段；正文检索从第 10 节起支持商品过滤。
@@ -117,7 +117,7 @@
 - Milvus 在虚拟机 `192.168.150.120:19530`，验收版本为服务端 2.5.5、PyMilvus 3.0.3、pymilvus-model 0.3.4；本地 BGE-M3 为 CPU/FP32。开始前只读核对当前连接、配置和集合，不能把历史在线记录当作当前在线，更不能重建或清空服务。任何必要数据库写入都须明确实验范围。MongoDB 在虚拟机 `192.168.150.120:27017`（容器 `my-mongo`，镜像 `mongo:7.0`，root 用户 `admin`，已启用密码）；密码只在用户本地 `.env`，不得写入仓库文档或日志，验证时用环境变量传入，写入只限实验会话。
 - 导入主图已接到 Web 上传、后台任务和状态轮询，CLI 仍是脚手架问候。复验查询可只读复用已入库的真实手册，不必重跑导入；`study_d15_*`、`verify_d15_*` 及第 16 节验证历史库均是实验数据，不当作正式数据。
 - 导入包已改名为 `import_processor`，2026-11-17 已把前九节教程、计划、设计和验收记录中的包路径同步为新名称，只改路径文字，没有改其他内容；以后路径以真实源码为准。
-- 教程保持三块正文、代码旁短讲、图后白话和 IDE/学习期 `__main__` 真实验证；除包路径同步外不回改已通过教程，不代写 `src/`。Git 只读，依赖使用 uv 与清华源，临时文件统一放 `workspace/`，无法运行的项目如实标记。
+- 已验收教程保留带练阶段的三块正文、代码旁短讲、图后白话和 IDE/学习期 `__main__` 真实验证方式。功能迭代的实施与交付按[项目协作规则](../../AGENTS.md)执行。
 
 ## 已结清
 

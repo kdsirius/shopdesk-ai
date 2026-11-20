@@ -3,14 +3,14 @@
 ## 已确认事实
 
 - 对外名称：**ShopDesk AI（商答台）**。GitHub 仓库：[kdsirius/shopdesk-ai](https://github.com/kdsirius/shopdesk-ai)，已由用户创建并推送，首次推送时为私有。
-- 原带练项目名：`shopkeeper-brain`，本次更名只对外展示。
-- Python 包名：`shopkeeper_brain`
+- Python 发行名和 CLI：`shopkeeper-brain`
+- Python 导入包：`app`（带练阶段为 `shopkeeper_brain`）
 - 配置前缀：`SHOPKEEPER_BRAIN_`
 - 参考项目：`reference/掌教智库/`
 - 视频资料：`reference/掌教智库/4.视频/day01` 至 `day16`
 - 包管理工具：`uv`
-- 学习方式：教程先于手敲；用户手敲代码；上一节验收通过后才开始下一节
-- 带练已结束；原功能作为扩展讨论的基线，尚未确定新的实现范围
+- 16 节带练已结束，已验收的商品手册问答作为功能迭代基线。
+- 后续迭代按[项目协作规则](../../AGENTS.md)执行，首个电商客服场景待确认。
 - 实验区：`workspace/`，已由根目录 `.gitignore` 忽略
 - 参考资料优先级：先看 `4.视频/dayXX/` 的视频目录图片确定当天范围，再看当天课堂笔记和代码；`1.笔记/` 作为补充资料，不覆盖对应视频日的内容事实
 
@@ -20,7 +20,7 @@
 - 教学方式以 [文档区规则](../AGENTS.md)、[教学偏好](teaching-preferences.md) 和用户最新确认的 [第 6 节教程](../study/day06-主体识别.md) 为准；第 3 节作为补充样例。本项目不使用子 agent。
 - 工程使用说明见根 [README](../../README.md)。答案生成、流式正文和配图回显见[第 16 节验收记录](day16-acceptance.md)。业务上传、查询进度和会话历史见[第 15 节验收记录](day15-acceptance.md)。FastAPI 输入校验和 SSE 见[第 14 节验收记录](day14-acceptance.md)与[备课记录](day14-preparation.md)。Web 服务骨架见 [第 13 节验收记录](day13-acceptance.md) 和 [第 13 节备课记录](day13-preparation.md)，融合与重排见 [第 12 节验收记录](day12-acceptance.md) 和 [第 12 节备课记录](day12-preparation.md)，HyDE 与联网搜索见 [第 11 节验收记录](day11-acceptance.md) 和 [第 11 节备课记录](day11-preparation.md)，向量检索见 [第 10 节验收记录](day10-acceptance.md) 和 [第 10 节备课记录](day10-preparation.md)，查询骨架与产品确认见 [第 9 节验收记录](day09-acceptance.md) 和 [第 9 节备课记录](day09-preparation.md)，两类集合与入库资料依据见 [第 8 节备课记录](day08-preparation.md)，向量资料错位见 [第 7 节备课记录](day07-preparation.md)。更早验收文件记录当时事实，不把其中“下一节”或环境限制直接当作当前状态。
 - 参考资料物理目录存在错位：`4.视频/day06/`仍是文档切片，主体识别和向量基础资料分布在 day07/day08。后续先读视频目录图片再定真实主题，不能仅按目录编号推断内容。
-- Web 服务由 [api/main.py](../../src/shopkeeper_brain/api/main.py) 启动。状态首页连接同源导入页与查询页：上传触发导入图，按任务 ID 轮询；查询用 `run_id` 收 SSE 进度、正文增量和完成结果，用 `session_id` 从 MongoDB 读回会话正文与配图。已有追问、拒答直接回显；确认产品后由答案节点消费重排资料并生成答案。各节点仍可通过学习期 `__main__` 单独验证，CLI 仍是脚手架问候。
+- Web 服务由 [api/main.py](../../app/api/main.py) 启动。状态首页连接同源导入页与查询页：上传触发导入图，按任务 ID 轮询；查询用 `run_id` 收 SSE 进度、正文增量和完成结果，用 `session_id` 从 MongoDB 读回会话正文与配图。已有追问、拒答直接回显；确认产品后由答案节点消费重排资料并生成答案。各节点仍可通过学习期 `__main__` 单独验证，CLI 仍是脚手架问候。
 - 导入包原名 `import_process`，已由用户改为 `import_processor`；文档中的路径已同步，以真实源码为准。
 - 第 5 节原 `chunks.json` 没有主体字段；第 6 节只在内存回填。第 7 节用户新产物 `workspace/day07-real-run/state_vector.json` 已有 `item_name`、两个名称向量字段及 21 个带双向量的 Chunk；第 8 节读取这份状态完成真实入库，后续产品确认和正文查询承接数据库记录，不为接手重复执行前八节导入。
 - Milvus 两类记录分别为 `kb_item_names`（自增 `pk`）和 `kb_chunks`（自增 `chunk_id`）。两集合均按 `file_title` 删除后插入；名称字段不回填主键，Chunk 主键只回填本次返回状态，没有新建含主键的 JSON 备份。重复导入主键可变，旧备份不能当成带当前数据库主键的状态。
@@ -66,24 +66,24 @@ flowchart LR
 
 ## 代码地图
 
-当前学习代码根目录是 [src/shopkeeper_brain/](../../src/shopkeeper_brain/)，不是参考笔记中的 `app/`：
+当前业务源码位于本仓库根目录的 [app/](../../app/)：
 
 | 位置 | 当前职责 |
 | --- | --- |
-| [core/](../../src/shopkeeper_brain/core/) | MinerU、图片/MinIO、文本模型、本地 Embedding、Milvus、MongoDB 和 Tavily 配置 |
-| [processor/import_processor/](../../src/shopkeeper_brain/processor/import_processor/) | 导入主图、状态、BaseNode 和异常；按 PDF／Markdown 分流后汇合入库 |
-| [import_processor/nodes/](../../src/shopkeeper_brain/processor/import_processor/nodes/) | 入口、PDF 转换、图片处理、切片、主体识别及名称保存、BGE 向量化、Chunk 入库节点 |
-| [processor/query_processor/](../../src/shopkeeper_brain/processor/query_processor/) | 查询流程：NodeBase、状态、主图路由；`nodes/` 包含产品确认、三路检索、融合、重排和答案输出 |
-| [utils/](../../src/shopkeeper_brain/utils/) | BGE-M3 模型复用与向量转换；Milvus 客户端复用、过滤转义、JSON Sparse 键恢复和混合检索；MongoDB 会话历史读写 |
-| [api/](../../src/shopkeeper_brain/api/) | FastAPI 启动入口、状态与练习路由、上传、任务状态、查询、一次性 SSE 订阅和历史路由 |
-| [services/](../../src/shopkeeper_brain/services/) | 执行导入和查询后台任务，将图更新转换为任务快照，将查询进度和正文增量转换为 SSE 事件 |
-| [front/](../../src/shopkeeper_brain/front/) | 同源状态页、SSE 练习页、导入页和查询页 |
+| [core/](../../app/core/) | MinerU、图片/MinIO、文本模型、本地 Embedding、Milvus、MongoDB 和 Tavily 配置 |
+| [processor/import_processor/](../../app/processor/import_processor/) | 导入主图、状态、BaseNode 和异常；按 PDF／Markdown 分流后汇合入库 |
+| [import_processor/nodes/](../../app/processor/import_processor/nodes/) | 入口、PDF 转换、图片处理、切片、主体识别及名称保存、BGE 向量化、Chunk 入库节点 |
+| [processor/query_processor/](../../app/processor/query_processor/) | 查询流程：NodeBase、状态、主图路由；`nodes/` 包含产品确认、三路检索、融合、重排和答案输出 |
+| [utils/](../../app/utils/) | BGE-M3 模型复用与向量转换；Milvus 客户端复用、过滤转义、JSON Sparse 键恢复和混合检索；MongoDB 会话历史读写 |
+| [api/](../../app/api/) | FastAPI 启动入口、状态与练习路由、上传、任务状态、查询、一次性 SSE 订阅和历史路由 |
+| [services/](../../app/services/) | 执行导入和查询后台任务，将图更新转换为任务快照，将查询进度和正文增量转换为 SSE 事件 |
+| [front/](../../app/front/) | 同源状态页、SSE 练习页、导入页和查询页 |
 
 当前业务调用方向为 `api → services → processor`，前端通过同源 API 访问业务。共享配置和工具位于 `core`、`utils`。
 
 ## 电商客服扩展（待讨论）
 
-当前从商品知识问答起步，订单查询、退换货和人工转接均未接入。下一阶段先选一个要解决的客服场景，梳理哪些导入、检索和会话能力可以复用，再确认第一版范围与验收判据；讨论确认前不改业务源码。
+当前从商品知识问答起步，订单查询、退换货和人工转接均未接入。首个客服场景先讨论可复用的导入、检索和会话能力，确认首版范围和验收标准后进入实现。
 
 ## 重要边界
 

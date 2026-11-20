@@ -29,7 +29,11 @@ dependencies = [
 ]
 
 [project.scripts]
-shopkeeper-brain = "shopkeeper_brain:main"
+shopkeeper-brain = "app:main"
+
+[tool.uv.build-backend]
+module-name = "app"
+module-root = ""
 
 [[tool.uv.index]]
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
